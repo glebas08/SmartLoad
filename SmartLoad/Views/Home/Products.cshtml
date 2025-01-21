@@ -1,0 +1,18 @@
+﻿@model IEnumerable<SmartLoad.Models.Product>
+@{
+    ViewData["Title"] = "Готовая продукция";
+}
+
+<h1>Готовая продукция</h1>
+
+<a href="@Url.Action("AddProduct", "Home")" class="btn btn-success">Добавить</a>
+
+
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>@item.Name</li>
+    }
+</ul>
+
+

@@ -1,0 +1,19 @@
+﻿@model IEnumerable<SmartLoad.Models.PackagingType>
+@{
+    ViewData["Title"] = "Типы упаковок";
+}
+
+<h1>Типы упаковок</h1>
+
+<p>Содержание для страницы типов упаковок.</p>
+
+<a href="@Url.Action("AddPackagingType", "Home")" class="btn btn-success">Добавить</a>
+
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>@item.Name</li>
+    }
+</ul>
+
+

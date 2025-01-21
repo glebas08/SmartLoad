@@ -1,0 +1,17 @@
+﻿@model IEnumerable<SmartLoad.Models.VehicleType>
+
+@{
+    ViewData["Title"] = "Типы ТС";
+}
+
+<h1>Типы ТС</h1>
+
+<a href="@Url.Action("AddVehicleType", "Home")" class="btn btn-success">Добавить</a>
+
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>@item.Name</li>
+    }
+</ul>
+

@@ -1,0 +1,19 @@
+﻿@model SmartLoad.Models.Product
+
+@{
+    ViewData["Title"] = "Добавить продукт";
+}
+
+<h1>Добавить продукт</h1>
+
+<form asp-action="AddProduct" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="texy-danger"></span>
+    </div>
+    <div class="form-group mt-3">
+        <input type="submit" value="Сохранить" class="btn btn-primary" />
+    </div>
+</form>
+
