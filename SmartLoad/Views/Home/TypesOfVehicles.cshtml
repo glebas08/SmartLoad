@@ -8,10 +8,57 @@
 
 <a href="@Url.Action("AddVehicleType", "Home")" class="btn btn-success">Добавить</a>
 
-<ul>
-    @foreach (var item in Model)
-    {
-        <li>@item.Name</li>
-    }
-</ul>
+<div style="overflow-x: auto; max-height: auto">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Транспорт </th>
+                <th>Длина</th>
+                <th>Ширина</th>
+                <th>Высота</th>
+                <th>Макс.грузоподъёмность(кг)</th>
+                <th>Макс.объём(м³)</th>
+                <th>Кол-во осей</th>
+                <th>Макс.нагрузка на ось(кг)</th>
+                <th>Собственный вес(кг)</th>
+                <th>Колёсная база(кг)</th>
+                <th>Передний свес(м)</th>
+                <th>Задний свес(м)</th>
+                <th>Типы дорог</th>
+                <th>Примечания</th>
+                <th>Вид ТС</th>
+                <th>Высота сцепного устр-ва(м)</th>
+                <th>Растояние до шкворня(м)</th>
+                <th>Задний свес за сцепным устр-ом(м)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var vehicle in Model)
+            {
+                <tr>
+                    <td>@vehicle.Id</td>
+                    <td>@vehicle.Name</td>
+                    <td>@vehicle.Length</td>
+                    <td>@vehicle.Width</td>
+                    <td>@vehicle.Height</td>
+                    <td>@vehicle.MaxLoadCapacity</td>
+                    <td>@vehicle.MaxVolumeCapasity</td>
+                    <td>@vehicle.AxleCount</td>
+                    <td>@vehicle.MaxAxleLoad</td>
+                    <td>@vehicle.EmptyWeight</td>
+                    <td>@vehicle.WheelBase</td>
+                    <td>@vehicle.FrontOverhang</td>
+                    <td>@vehicle.RearOverhang</td>
+                    <td>@vehicle.AllowedRoadTypes</td>
+                    <td>@vehicle.Notes</td>
+                    <td>@vehicle.ViewType</td>
+                    <td>@vehicle.CouplingDevice</td>
+                    <td>@vehicle.Kingpindist</td>
+                    <td>@vehicle.OverBeyond</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
