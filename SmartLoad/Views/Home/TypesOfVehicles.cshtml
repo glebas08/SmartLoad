@@ -13,7 +13,7 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Транспорт </th>
+                <th>Транспорт</th>
                 <th>Длина</th>
                 <th>Ширина</th>
                 <th>Высота</th>
@@ -22,7 +22,7 @@
                 <th>Кол-во осей</th>
                 <th>Макс.нагрузка на ось(кг)</th>
                 <th>Собственный вес(кг)</th>
-                <th>Колёсная база(кг)</th>
+                <th>Колёсная база(м)</th>
                 <th>Передний свес(м)</th>
                 <th>Задний свес(м)</th>
                 <th>Типы дорог</th>
@@ -31,10 +31,11 @@
                 <th>Высота сцепного устр-ва(м)</th>
                 <th>Растояние до шкворня(м)</th>
                 <th>Задний свес за сцепным устр-ом(м)</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(var vehicle in Model)
+            @foreach (var vehicle in Model)
             {
                 <tr>
                     <td>@vehicle.Id</td>
@@ -56,9 +57,12 @@
                     <td>@vehicle.CouplingDevice</td>
                     <td>@vehicle.Kingpindist</td>
                     <td>@vehicle.OverBeyond</td>
+                    <td>
+                        <a asp-action="EditVehicleType" asp-route-id="@vehicle.Id" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeleteVehicleType" asp-route-id="@vehicle.Id" class="btn btn-danger">Удалить</a>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
-

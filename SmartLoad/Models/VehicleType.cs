@@ -1,61 +1,67 @@
-﻿namespace SmartLoad.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SmartLoad.Models
 {
-    //Клас для таблицы Тип транспортного средства
+    //Класс для таблицы Тип транспортного средства
     public class VehicleType
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Название обязательно")]
+        [StringLength(100, ErrorMessage = "Название не должно превышать 100 символов")]
         public string Name { get; set; }
-        
-        //Длина ТС в метрах
+
+        [Range(0, float.MaxValue, ErrorMessage = "Длина должна быть положительным числом")]
         public float Length { get; set; }
 
-        //Ширина ТС 
+        [Range(0, float.MaxValue, ErrorMessage = "Ширина должна быть положительным числом")]
         public float Width { get; set; }
 
-        //Высота ТС
+        [Range(0, float.MaxValue, ErrorMessage = "Высота должна быть положительным числом")]
         public float Height { get; set; }
 
-        //Максимальная грузоподъёмность в кг
+        [Range(0, float.MaxValue, ErrorMessage = "Максимальная грузоподъемность должна быть положительным числом")]
         public float MaxLoadCapacity { get; set; }
 
-        //Максимальный объём 
+        [Range(0, float.MaxValue, ErrorMessage = "Максимальный объем должен быть положительным числом")]
         public float MaxVolumeCapasity { get; set; }
 
-        //Количество осей 
+        [Range(0, int.MaxValue, ErrorMessage = "Количество осей должно быть положительным числом")]
         public int AxleCount { get; set; }
 
-        //Максимально допустимая нагрузка на одну ось
+        [Range(0, float.MaxValue, ErrorMessage = "Максимальная нагрузка на ось должна быть положительным числом")]
         public float MaxAxleLoad { get; set; }
 
-        //Собственный вес ТС
+        [Range(0, float.MaxValue, ErrorMessage = "Собственный вес должен быть положительным числом")]
         public float EmptyWeight { get; set; }
 
-        //База колёс (растояние между передней и задней осями, в метрах)
+        [Range(0, float.MaxValue, ErrorMessage = "Колесная база должна быть положительным числом")]
         public float WheelBase { get; set; }
 
-        //Передний свес 
+        [Range(0, float.MaxValue, ErrorMessage = "Передний свес должен быть положительным числом")]
         public float FrontOverhang { get; set; }
 
-        //Задний свес 
+        [Range(0, float.MaxValue, ErrorMessage = "Задний свес должен быть положительным числом")]
         public float RearOverhang { get; set; }
 
-        //Тип дорог, по которым может передвигаться ТС (например, городские, междугородние, горные)
+        [Required(ErrorMessage = "Типы дорог обязательны")]
+        [StringLength(255, ErrorMessage = "Типы дорог не должны превышать 255 символов")]
         public string AllowedRoadTypes { get; set; }
 
-        //Дополнительные примечасния или особенности
+        [StringLength(500, ErrorMessage = "Примечания не должны превышать 500 символов")]
         public string Notes { get; set; }
 
-        //Вид ТС
+        [Required(ErrorMessage = "Вид ТС обязателен")]
+        [StringLength(100, ErrorMessage = "Вид ТС не должен превышать 100 символов")]
         public string ViewType { get; set; }
 
-        //Высота седельно-сцепного устройства (важна для полуприцепа)
+        [Range(0, float.MaxValue, ErrorMessage = "Высота сцепного устройства должна быть положительным числом")]
         public float CouplingDevice { get; set; }
 
-        // Расстояние от переднего свеса до шкворня. Это расстояние влияет на маневренность полуприцепа.
+        [Range(0, float.MaxValue, ErrorMessage = "Расстояние до шкворня должно быть положительным числом")]
         public float Kingpindist { get; set; }
 
-        // Задний свес за седельно-сцепным устройством, важен для расчета распределения нагрузки на оси.
+        [Range(0, float.MaxValue, ErrorMessage = "Задний свес за сцепным устройством должен быть положительным числом")]
         public float OverBeyond { get; set; }
-
     }
 }

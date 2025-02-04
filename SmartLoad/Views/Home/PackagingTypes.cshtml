@@ -1,19 +1,44 @@
 ﻿@model IEnumerable<SmartLoad.Models.PackagingType>
+
 @{
     ViewData["Title"] = "Типы упаковок";
 }
 
 <h1>Типы упаковок</h1>
 
-<p>Содержание для страницы типов упаковок.</p>
-
 <a href="@Url.Action("AddPackagingType", "Home")" class="btn btn-success">Добавить</a>
 
-<ul>
-    @foreach (var item in Model)
-    {
-        <li>@item.Name</li>
-    }
-</ul>
-
-
+<div style="overflow-x: auto; max-height: auto">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Объем (м³)</th>
+                <th>Масса (кг)</th>
+                <th>Длина (м)</th>
+                <th>Ширина (м)</th>
+                <th>Высота (м)</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Volume</td>
+                    <td>@item.Weight</td>
+                    <td>@item.Length</td>
+                    <td>@item.Width</td>
+                    <td>@item.Height</td>
+                    <td>
+                        <a asp-action="EditPackagingType" asp-route-id="@item.Id" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeletePackagingType" asp-route-id="@item.Id" class="btn btn-danger">Удалить</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
