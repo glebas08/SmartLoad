@@ -1,0 +1,43 @@
+﻿@model IEnumerable<SmartLoad.Models.LoadingProduct>
+@{
+    ViewData["Title"] = "Продукты в схеме погрузки";
+    var loadingSchemeId = ViewBag.LoadingSchemeId;
+}
+
+<h1>Продукты в схеме погрузки: @loadingSchemeId</h1>
+
+<a href="@Url.Action("AddLoadingProduct", "Home", new { loadingSchemeId })" class="btn btn-success">Добавить продукт</a>
+<a href="@Url.Action("LoadingSchemes", "Home")" class="btn btn-secondary">Назад к схемам погрузки</a>
+
+<div style="overflow-x: auto; max-height: auto">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Продукт</th>
+                <th>Количество</th>
+                <th>Позиция X (м)</th>
+                <th>Позиция Y (м)</th>
+                <th>Позиция Z (м)</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Id</td>
+                    <td>@product.Product.Name</td>
+                    <td>@product.Quantity</td>
+                    <td>@product.PositionX</td>
+                    <td>@product.PositionY</td>
+                    <td>@product.PositionZ</td>
+                    <td>
+                        <a asp-action="EditLoadingProduct" asp-route-id="@product.Id" asp-route-loadingSchemeId="@ViewBag.LoadingSchemeId" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeleteLoadingProduct" asp-route-id="@product.Id" asp-route-loadingSchemeId="@ViewBag.LoadingSchemeId" class="btn btn-danger">Удалить</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

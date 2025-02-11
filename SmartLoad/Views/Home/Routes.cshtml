@@ -1,0 +1,40 @@
+﻿@model IEnumerable<SmartLoad.Models.Rout>
+@{
+    ViewData["Title"] = "Маршруты";
+}
+
+<h1>Маршруты</h1>
+
+<a href="@Url.Action("AddRoute", "Home")" class="btn btn-success">Добавить маршрут</a>
+
+<div style="overflow-x: auto; max-height: auto">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название маршрута</th>
+                <th>Дата отправления</th>
+                <th>Дата прибытия</th>
+                <th>Примечания</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var route in Model)
+            {
+                <tr>
+                    <td>@route.Id</td>
+                    <td>@route.Name</td>
+                    <td>@route.DepartureDate.ToString("dd.MM.yyyy")</td>
+                    <td>@route.ArrivalDate.ToString("dd.MM.yyyy")</td>
+                    <td>@route.Notes</td>
+                    <td>
+                        <a asp-action="EditRoute" asp-route-id="@route.Id" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeleteRoute" asp-route-id="@route.Id" class="btn btn-danger">Удалить</a>
+                        <a asp-action="RoutePoints" asp-route-routeId="@route.Id" class="btn btn-info">Точки маршрута</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -14,57 +14,57 @@
     </div>
     <div class="form-group">
         <label asp-for="Length" class="control-label"></label>
-        <input asp-for="Length" class="form-control" />
+        <input asp-for="Length" class="form-control" step="any" />
         <span asp-validation-for="Length" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Width" class="control-label"></label>
-        <input asp-for="Width" class="form-control" />
+        <input asp-for="Width" class="form-control" step="any" />
         <span asp-validation-for="Width" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Height" class="control-label"></label>
-        <input asp-for="Height" class="form-control" />
+        <input asp-for="Height" class="form-control" step="any" />
         <span asp-validation-for="Height" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="MaxLoadCapacity" class="control-label"></label>
-        <input asp-for="MaxLoadCapacity" class="form-control" />
+        <input asp-for="MaxLoadCapacity" class="form-control" step="any" />
         <span asp-validation-for="MaxLoadCapacity" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MaxVolumeCapasity" class="control-label"></label>
-        <input asp-for="MaxVolumeCapasity" class="form-control" />
-        <span asp-validation-for="MaxVolumeCapasity" class="text-danger"></span>
+        <label asp-for="MaxVolumeCapacity" class="control-label"></label>
+        <input asp-for="MaxVolumeCapacity" class="form-control" step="any" />
+        <span asp-validation-for="MaxVolumeCapacity" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="AxleCount" class="control-label"></label>
-        <input asp-for="AxleCount" class="form-control" />
+        <input asp-for="AxleCount" class="form-control" step="any" />
         <span asp-validation-for="AxleCount" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="MaxAxleLoad" class="control-label"></label>
-        <input asp-for="MaxAxleLoad" class="form-control" />
+        <input asp-for="MaxAxleLoad" class="form-control" step="any" />
         <span asp-validation-for="MaxAxleLoad" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="EmptyWeight" class="control-label"></label>
-        <input asp-for="EmptyWeight" class="form-control" />
+        <input asp-for="EmptyWeight" class="form-control" step="any" />
         <span asp-validation-for="EmptyWeight" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="WheelBase" class="control-label"></label>
-        <input asp-for="WheelBase" class="form-control" />
+        <input asp-for="WheelBase" class="form-control" step="any" />
         <span asp-validation-for="WheelBase" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="FrontOverhang" class="control-label"></label>
-        <input asp-for="FrontOverhang" class="form-control" />
+        <input asp-for="FrontOverhang" class="form-control" step="any" />
         <span asp-validation-for="FrontOverhang" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="RearOverhang" class="control-label"></label>
-        <input asp-for="RearOverhang" class="form-control" />
+        <input asp-for="RearOverhang" class="form-control" step="any" />
         <span asp-validation-for="RearOverhang" class="text-danger"></span>
     </div>
     <div class="form-group">
@@ -84,21 +84,22 @@
     </div>
     <div class="form-group">
         <label asp-for="CouplingDevice" class="control-label"></label>
-        <input asp-for="CouplingDevice" class="form-control" />
+        <input asp-for="CouplingDevice" class="form-control" step="any" />
         <span asp-validation-for="CouplingDevice" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Kingpindist" class="control-label"></label>
-        <input asp-for="Kingpindist" class="form-control" />
+        <input asp-for="Kingpindist" class="form-control" step="any" />
         <span asp-validation-for="Kingpindist" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="OverBeyond" class="control-label"></label>
-        <input asp-for="OverBeyond" class="form-control" />
+        <input asp-for="OverBeyond" class="form-control" step="any" />
         <span asp-validation-for="OverBeyond" class="text-danger"></span>
     </div>
     <div class="form-group mt-3">
         <input type="submit" value="Сохранить" class="btn btn-primary" />
+        <a asp-action="TypesOfVehicles" class="btn btn-secondary">Отмена</a>
     </div>
 </form>
 

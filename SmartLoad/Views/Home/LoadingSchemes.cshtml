@@ -1,0 +1,40 @@
+﻿@model IEnumerable<SmartLoad.Models.LoadingScheme>
+@{
+    ViewData["Title"] = "Схемы погрузки";
+}
+
+<h1>Схемы погрузки</h1>
+
+<a href="@Url.Action("AddLoadingScheme", "Home")" class="btn btn-success">Добавить схему погрузки</a>
+
+<div style="overflow-x: auto; max-height: auto">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Транспортное средство</th>
+                <th>Дата загрузки</th>
+                <th>Статус</th>
+                <th>Примечания</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var scheme in Model)
+            {
+                <tr>
+                    <td>@scheme.Id</td>
+                    <td>@scheme.VehicleType.Name</td>
+                    <td>@scheme.LoadingDate.ToString("dd.MM.yyyy")</td>
+                    <td>@scheme.Status</td>
+                    <td>@scheme.Notes</td>
+                    <td>
+                        <a asp-action="LoadingProducts" asp-route-loadingSchemeId="@scheme.Id" class="btn btn-info">Продукты</a>
+                        <a asp-action="EditLoadingScheme" asp-route-id="@scheme.Id" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeleteLoadingScheme" asp-route-id="@scheme.Id" class="btn btn-danger">Удалить</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,60 @@
+﻿@model SmartLoad.Models.RoutePoint
+
+@{
+    ViewData["Title"] = "Добавить точку маршрута";
+    var routeId = ViewBag.RouteId;
+}
+
+<h1>Добавить точку маршрута для маршрута: @routeId</h1>
+
+<form asp-action="AddRoutePoint" method="post">
+    <input type="hidden" asp-for="RouteId" value="@routeId" />
+
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UnloadingDate" class="control-label"></label>
+        <input asp-for="UnloadingDate" class="form-control" type="date" />
+        <span asp-validation-for="UnloadingDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OrderRoutePoints" class="control-label"></label>
+        <select id="orderIds" class="form-control" asp-items="ViewBag.OrderId" multiple>
+            <option value="">Выберите заказы</option>
+        </select>
+        <span asp-validation-for="OrderRoutePoints" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="@Url.Action("RoutePoints", "Home", new { routeId })" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const orderIdsSelect = document.getElementById('orderIds');
+            const form = document.querySelector('form');
+
+            form.addEventListener('submit', function (event) {
+                const selectedOrderIds = Array.from(orderIdsSelect.selectedOptions, option => option.value);
+
+                selectedOrderIds.forEach(orderId => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selectedOrderIds';
+                    input.value = orderId;
+                    form.appendChild(input);
+                });
+            });
+        });
+    </script>
+}

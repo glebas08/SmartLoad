@@ -1,0 +1,45 @@
+﻿@model SmartLoad.Models.Order
+
+@{
+    ViewData["Title"] = "Добавить заказ";
+}
+
+<h1>Добавить заказ</h1>
+
+<form asp-action="AddOrder" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderDate" class="control-label"></label>
+        <input asp-for="OrderDate" class="form-control" type="date" />
+        <span asp-validation-for="OrderDate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Status" class="control-label"></label>
+        <input asp-for="Status" class="form-control" />
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Notes" class="control-label"></label>
+        <textarea asp-for="Notes" class="form-control"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="RouteId" class="control-label"></label>
+        <select asp-for="RouteId" class="form-control" asp-items="ViewBag.RouteId">
+            <option value="">Выберите маршрут</option>
+        </select>
+        <span asp-validation-for="RouteId" class="text-danger"></span>
+    </div>
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="@Url.Action("Orders", "Home")" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

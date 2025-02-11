@@ -1,0 +1,34 @@
+﻿@model SmartLoad.Models.OrderProduct
+@{
+    ViewData["Title"] = "Добавить продукт в заказ";
+    var orderId = ViewBag.OrderId;
+}
+
+<h1>Добавить продукт в заказ: @orderId</h1>
+
+<form asp-action="AddOrderProduct" method="post">
+    <input type="hidden" asp-for="OrderId" value="@orderId" />
+
+    <div class="form-group">
+        <label asp-for="ProductId" class="control-label"></label>
+        <select asp-for="ProductId" class="form-control" asp-items="ViewBag.ProductId">
+            <option value="">Выберите продукт</option>
+        </select>
+        <span asp-validation-for="ProductId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Quantity" class="control-label"></label>
+        <input asp-for="Quantity" class="form-control" autocomplete="off" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="@Url.Action("OrderProducts", "Home", new { orderId })" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

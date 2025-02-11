@@ -1,8 +1,14 @@
-using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using SmartLoad.Data;
 using SmartLoad.Models;
+using SmartLoad.Services;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Globalization;
 
-// Создание билдера приложения 
 var builder = WebApplication.CreateBuilder(args);
 
 // Настройка культуры для всего приложения
@@ -10,29 +16,26 @@ var cultureInfo = new CultureInfo("en-US"); // Используем культуру с точкой как 
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
+// Добавление строки подключения к базе данных
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//Добаввление стрки подключения кв сервисы
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// добавление сервисов в контейнер
+// Добавление сервисов в контейнер
 builder.Services.AddControllersWithViews();
 
-//Построение прилодения 
+// Регистрация сервиса для загрузки
+builder.Services.AddScoped<LoadingService>(); // Добавлено
+
+// Построение приложения
 var app = builder.Build();
 
 // Настройка конвейера обработки запросов
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-// Настройка промежуточного ПО
-// Эти строки кода добавляют различные компоненты промежуточного ПО в конвейер обработки запросов:
-//- `UseHttpsRedirection`: перенаправляет HTTP-запросы на HTTPS.
-//- `UseStaticFiles`: обслуживает статические файлы (например, CSS, JavaScript).
-//- `UseRouting`: добавляет поддержку маршрутизации.
-//- `UseAuthorization`: добавляет поддержку авторизации.
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -40,10 +43,8 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-// Настройка маршрутизации (Этот код настраивает маршрут по умолчанию для контроллеров MVC.)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-//Запуск прилрожения 
 app.Run();

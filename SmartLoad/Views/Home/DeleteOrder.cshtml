@@ -1,0 +1,45 @@
+﻿@model SmartLoad.Models.Order
+
+@{
+    ViewData["Title"] = "Удалить заказ";
+}
+
+<h1>Удалить заказ</h1>
+
+<h3>Вы уверены, что хотите удалить этот заказ?</h3>
+<div>
+    <h4>Order</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderDate.ToString("dd.MM.yyyy"))
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Rout.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Rout.Name)
+        </dd>
+    </dl>
+
+    <form asp-action="DeleteOrder" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Удалить" class="btn btn-danger" /> |
+        <a href="@Url.Action("Orders", "Home")" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>

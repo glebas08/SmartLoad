@@ -1,11 +1,11 @@
 ﻿@model SmartLoad.Models.PackagingType
-
 @{
     ViewData["Title"] = "Удалить тип упаковки";
+    var productId = ViewBag.ProductId;
+    var productName = ViewBag.ProductName;
 }
 
-<h1>Удалить тип упаковки</h1>
-
+<h1>Удалить тип упаковки для продукта: @productName</h1>
 <h3>Вы уверены, что хотите удалить этот тип упаковки?</h3>
 <div>
     <h4>PackagingType</h4>
@@ -52,6 +52,6 @@
     <form asp-action="DeletePackagingType" method="post">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Удалить" class="btn btn-danger" /> |
-        <a asp-action="PackagingTypes" class="btn btn-secondary">Отмена</a>
+        <a href="@Url.Action("ProductPackaging", "Home", new { productId })" class="btn btn-secondary">Отмена</a>
     </form>
 </div>

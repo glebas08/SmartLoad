@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartLoad.Models
 {
-    // Класс для таблицы тип упаковки 
     public class PackagingType
     {
         public int Id { get; set; }
@@ -12,29 +12,36 @@ namespace SmartLoad.Models
         [Display(Name = "Название")]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Вес обязателен")]
-        [Range(0, float.MaxValue, ErrorMessage = "Вес должен быть положительным числом")]
-        [Display(Name = "Вес (кг)")]
-        public float Weight { get; set; } // Масса упаковки (кг)
-
         [Required(ErrorMessage = "Длина обязательна")]
         [Range(0, float.MaxValue, ErrorMessage = "Длина должна быть положительным числом")]
         [Display(Name = "Длина (м)")]
-        public float Length { get; set; } // Длина упаковки (м)
-        
+        public float Length { get; set; }
+
         [Required(ErrorMessage = "Ширина обязательна")]
         [Range(0, float.MaxValue, ErrorMessage = "Ширина должна быть положительным числом")]
         [Display(Name = "Ширина (м)")]
-        public float Width { get; set; } // Ширина упаковки (м)
+        public float Width { get; set; }
 
         [Required(ErrorMessage = "Высота обязательна")]
         [Range(0, float.MaxValue, ErrorMessage = "Высота должна быть положительным числом")]
         [Display(Name = "Высота (м)")]
-        public float Height { get; set; } // Высота упаковки (м)
-        
+        public float Height { get; set; }
+
         [Required(ErrorMessage = "Объем обязателен")]
         [Range(0, float.MaxValue, ErrorMessage = "Объем должен быть положительным числом")]
         [Display(Name = "Объем (м³)")]
-        public float Volume { get; set; } // Объем упаковки (м³)
+        public float Volume => Length * Width * Height;
+
+        [Required(ErrorMessage = "Вес обязателен")]
+        [Range(0, float.MaxValue, ErrorMessage = "Вес должен быть положительным числом")]
+        [Display(Name = "Вес (кг)")]
+        public float Weight { get; set; }
+
+        // Связь с продуктом
+        [Required(ErrorMessage = "Продукт обязателен")]
+        public int ProductId { get; set; }
+
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
     }
 }
