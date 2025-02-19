@@ -265,7 +265,8 @@ namespace SmartLoad.Migrations
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     PositionX = table.Column<float>(type: "real", nullable: false),
                     PositionY = table.Column<float>(type: "real", nullable: false),
-                    PositionZ = table.Column<float>(type: "real", nullable: false)
+                    PositionZ = table.Column<float>(type: "real", nullable: false),
+                    PackagingTypeId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -280,6 +281,12 @@ namespace SmartLoad.Migrations
                         name: "FK_LoadingProducts_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LoadingProducts_PackagingTypes_PackagingTypeId",
+                        column: x => x.PackagingTypeId,
+                        principalTable: "PackagingTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -305,6 +312,11 @@ namespace SmartLoad.Migrations
                 name: "IX_LoadingProducts_OrderId",
                 table: "LoadingProducts",
                 column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LoadingProducts_PackagingTypeId",
+                table: "LoadingProducts",
+                column: "PackagingTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LoadingProducts_ProductId",
@@ -380,10 +392,10 @@ namespace SmartLoad.Migrations
                 name: "OrderRoutePoints");
 
             migrationBuilder.DropTable(
-                name: "PackagingTypes");
+                name: "LoadingSchemes");
 
             migrationBuilder.DropTable(
-                name: "LoadingSchemes");
+                name: "PackagingTypes");
 
             migrationBuilder.DropTable(
                 name: "Orders");
@@ -392,10 +404,10 @@ namespace SmartLoad.Migrations
                 name: "RoutePoints");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "Vehicles");
 
             migrationBuilder.DropTable(
-                name: "Vehicles");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Routes");

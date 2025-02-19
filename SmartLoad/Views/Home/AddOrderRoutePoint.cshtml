@@ -5,9 +5,9 @@
     var orderId = ViewBag.OrderId;
 }
 
-<h1>Добавить связь между заказом и точкой маршрута</h1>
+<h1>Добавить связь между заказом и точкой маршрута для заказа: @orderId</h1>
 
-<form asp-action="AddOrderRoutePoint" method="post">
+<form asp-action="AddOrderRoutePoint" asp-controller="Home" method="post">
     <input type="hidden" asp-for="OrderId" value="@orderId" />
 
     <div class="form-group">

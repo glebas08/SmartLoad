@@ -12,8 +12,8 @@ using SmartLoad.Data;
 namespace SmartLoad.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250211091621_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250213061603_UpdateOrderRoutePoint")]
+    partial class UpdateOrderRoutePoint
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace SmartLoad.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("PackagingTypeId")
+                        .HasColumnType("integer");
+
                     b.Property<float>("PositionX")
                         .HasColumnType("real");
 
@@ -62,6 +65,8 @@ namespace SmartLoad.Migrations
                     b.HasIndex("LoadingSchemeId");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("PackagingTypeId");
 
                     b.HasIndex("ProductId");
 
@@ -425,6 +430,12 @@ namespace SmartLoad.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SmartLoad.Models.PackagingType", "PackagingType")
+                        .WithMany()
+                        .HasForeignKey("PackagingTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SmartLoad.Models.Product", "Product")
                         .WithMany("LoadingProducts")
                         .HasForeignKey("ProductId")
@@ -440,6 +451,8 @@ namespace SmartLoad.Migrations
                     b.Navigation("LoadingScheme");
 
                     b.Navigation("Order");
+
+                    b.Navigation("PackagingType");
 
                     b.Navigation("Product");
 

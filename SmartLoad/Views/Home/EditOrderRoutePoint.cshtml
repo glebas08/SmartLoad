@@ -8,8 +8,8 @@
 <h1>Редактировать связь между заказом и точкой маршрута</h1>
 
 <form asp-action="EditOrderRoutePoint" method="post">
-    <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="OrderId" value="@orderId" />
+    <input type="hidden" asp-for="RoutePointId" />
 
     <div class="form-group">
         <label asp-for="RoutePointId" class="control-label"></label>

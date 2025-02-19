@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<SmartLoad.Models.LoadingScheme>
+
 @{
     ViewData["Title"] = "Схемы погрузки";
 }
@@ -29,9 +30,9 @@
                     <td>@scheme.Status</td>
                     <td>@scheme.Notes</td>
                     <td>
-                        <a asp-action="LoadingProducts" asp-route-loadingSchemeId="@scheme.Id" class="btn btn-info">Продукты</a>
-                        <a asp-action="EditLoadingScheme" asp-route-id="@scheme.Id" class="btn btn-primary">Редактировать</a>
-                        <a asp-action="DeleteLoadingScheme" asp-route-id="@scheme.Id" class="btn btn-danger">Удалить</a>
+                        <a asp-action="LoadingProducts" asp-controller="Home" asp-route-loadingSchemeId="@scheme.Id" class="btn btn-info">Продукты</a>
+                        <a asp-action="EditLoadingScheme" asp-controller="Home" asp-route-id="@scheme.Id" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeleteLoadingScheme" asp-controller="Home" asp-route-id="@scheme.Id" class="btn btn-danger">Удалить</a>
                     </td>
                 </tr>
             }

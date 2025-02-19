@@ -2,8 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-//будет представлять схему погрузки, которая определяет, как продукты будут размещены в полуприцепе для конкретного маршрута и заказа
-
 namespace SmartLoad.Models
 {
     public class LoadingScheme
@@ -33,16 +31,16 @@ namespace SmartLoad.Models
         [Display(Name = "Примечания")]
         public string Notes { get; set; }
 
-        // Навигационное свойство для типа транспортного средства
+        // Навигационное свойство
         public VehicleType VehicleType { get; set; }
 
-        // Навигационное свойство для транспортного средства
+        // Навигационное свойство
         public Vehicle Vehicle { get; set; }
 
-        // Навигационное свойство для маршрута
+        // Навигационное свойство
         public SmartLoad.Models.Rout Rout { get; set; }
 
-        // Навигационное свойство для продуктов в схеме погрузки
+        // Навигационное свойство
         public ICollection<LoadingProduct> LoadingProducts { get; set; }
     }
 }

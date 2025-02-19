@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-//будет представлять продукты, входящие в схему погрузки, а также их позиции внутри полуприцепа.
-
 namespace SmartLoad.Models
 {
     public class LoadingProduct
@@ -52,5 +50,25 @@ namespace SmartLoad.Models
 
         // Навигационное свойство
         public RoutePoint RoutePoint { get; set; }
+
+        // Поле для хранения ID типа упаковки
+        [Required(ErrorMessage = "Тип упаковки обязателен")]
+        public int PackagingTypeId { get; set; }
+
+        // Навигационное свойство для типа упаковки
+        [ForeignKey("PackagingTypeId")]
+        public PackagingType PackagingType { get; set; }
+    }
+
+    public class LoadingProductDto
+    {
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+        public float PositionX { get; set; }
+        public float PositionY { get; set; }
+        public float PositionZ { get; set; }
+        public ProductDto Product { get; set; }
+        public PackagingTypeDto PackagingType { get; set; }
     }
 }

@@ -27,7 +27,7 @@
     </dl>
 
     <form asp-action="DeleteOrderRoutePointConfirmed" method="post">
-        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="OrderId" />
         <input type="submit" value="Удалить" class="btn btn-danger" /> |
         <a href="@Url.Action("OrderRoutePoints", "Home", new { orderId })" class="btn btn-secondary">Отмена</a>
     </form>

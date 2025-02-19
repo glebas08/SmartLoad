@@ -5,7 +5,7 @@
     var loadingSchemeId = ViewBag.LoadingSchemeId;
 }
 
-<h1>Редактировать продукт в схеме погрузки: @loadingSchemeId</h1>
+<h1>Редактировать продукт в схеме погрузки</h1>
 
 <form asp-action="EditLoadingProduct" method="post">
     <input type="hidden" asp-for="Id" />
@@ -17,6 +17,30 @@
             <option value="">Выберите продукт</option>
         </select>
         <span asp-validation-for="ProductId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PackagingTypeId" class="control-label"></label>
+        <select asp-for="PackagingTypeId" class="form-control" asp-items="ViewBag.PackagingTypeId">
+            <option value="">Выберите тип упаковки</option>
+        </select>
+        <span asp-validation-for="PackagingTypeId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OrderId" class="control-label"></label>
+        <select asp-for="OrderId" class="form-control" asp-items="ViewBag.OrderId">
+            <option value="">Выберите заказ</option>
+        </select>
+        <span asp-validation-for="OrderId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="RoutePointId" class="control-label"></label>
+        <select asp-for="RoutePointId" class="form-control" asp-items="ViewBag.RoutePointId">
+            <option value="">Выберите точку маршрута</option>
+        </select>
+        <span asp-validation-for="RoutePointId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -54,10 +78,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const productIdInput = document.getElementById('ProductId');
-            const quantityInput = document.getElementById('Quantity');
-            const positionXInput = document.getElementById('PositionX');
-            const positionYInput = document.getElementById('PositionY');
-            const positionZInput = document.getElementById('PositionZ');
+            const packagingTypeIdSelect = document.getElementById('PackagingTypeId');
 
             productIdInput.addEventListener('change', function () {
                 const productId = this.value;
@@ -65,13 +86,29 @@
                     fetch(`/Home/GetProductDetails?id=${productId}`)
                         .then(response => response.json())
                         .then(data => {
-                            if (data) {
-                                // Присваиваем значения полям формы
-                                positionXInput.value = '';
-                                positionYInput.value = '';
-                                positionZInput.value = '';
+                            if (data && data.packagingTypes) {
+                                // Очистка существующих опций
+                                packagingTypeIdSelect.innerHTML = '<option value="">Выберите тип упаковки</option>';
+
+                                // Заполняем новые варианты выбора типов упаковки
+                                data.packagingTypes.forEach(pt => {
+                                    const option = document.createElement('option');
+                                    option.value = pt.id;
+                                    option.text = pt.name;
+                                    packagingTypeIdSelect.appendChild(option);
+                                });
+                            } else {
+                                console.error('Нет данных о типах упаковки для продукта с ID:', productId);
+                                packagingTypeIdSelect.innerHTML = '<option value="">Нет доступных типов упаковки</option>';
                             }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при получении данных о типах упаковки:', error);
+                            packagingTypeIdSelect.innerHTML = '<option value="">Ошибка при загрузке типов упаковки</option>';
                         });
+                } else {
+                    // Если продукт не выбран, очищаем выбор типов упаковки
+                    packagingTypeIdSelect.innerHTML = '<option value="">Выберите тип упаковки</option>';
                 }
             });
         });
