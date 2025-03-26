@@ -1,0 +1,103 @@
+﻿@model SmartLoad.Models.Order
+
+@{
+    ViewData["Title"] = "Добавить заказ";
+}
+
+<h1>Добавить заказ</h1>
+
+<form asp-action="AddOrder" method="post">
+    <!-- Поле для названия заказа -->
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название заказа</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <!-- Поле для выбора клиента -->
+    <div class="form-group">
+        <label asp-for="DistributorId" class="control-label">Клиент</label>
+        <select asp-for="DistributorId" class="form-control" asp-items="ViewBag.Distributors">
+            <option value="">Выберите клиента</option>
+        </select>
+        <span asp-validation-for="DistributorId" class="text-danger"></span>
+        <!-- Кнопка для добавления нового клиента -->
+        <a href="@Url.Action("AddDistributor", "Order")" class="btn btn-info mt-2">Добавить нового клиента</a>
+    </div>
+
+    <!-- Поле для выбора точки маршрута -->
+    <div class="form-group">
+        <label asp-for="RoutePoint.Id" class="control-label">Точка выгрузки</label>
+        <select asp-for="RoutePoint.Id" class="form-control" asp-items="ViewBag.RoutePoints">
+            <option value="">Выберите точку маршрута</option>
+        </select>
+        <span asp-validation-for="RoutePoint.Id" class="text-danger"></span>
+        <!-- Кнопка для добавления новой точки маршрута -->
+        <a href="@Url.Action("AddRoutePoint", "Order")" class="btn btn-info mt-2">Добавить новую точку маршрута</a>
+    </div>
+
+    <!-- Поле для даты доставки -->
+    <div class="form-group">
+        <label asp-for="DeliveryDate" class="control-label">Дата доставки</label>
+        <input asp-for="DeliveryDate" class="form-control" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="DeliveryDate" class="text-danger"></span>
+    </div>
+
+    <!-- Таблица для продуктов -->
+    <h2>Продукты в заказе</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название продукта</th>
+                <th>Количество</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="productsTableBody">
+            <!-- Здесь будут добавляться строки продуктов -->
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-success" id="addProductRow">Добавить продукт</button>
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="@Url.Action("Orders", "Order")" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addProductButton = document.getElementById('addProductRow');
+            const tableBody = document.getElementById('productsTableBody');
+
+            addProductButton.addEventListener('click', function () {
+                const newRow = document.createElement('tr');
+
+                newRow.innerHTML = `
+                    <td>
+                        <select name="OrderProducts[0].ProductId" class="form-control">
+        @foreach (var product in ViewBag.Products as List<SmartLoad.Models.Product>)
+        {
+                                        <option value="@product.Id">@product.Name</option>
+        }
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="OrderProducts[0].Quantity" class="form-control" placeholder="Количество" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger removeProductRow">Удалить</button>
+                    </td>
+                `;
+
+                tableBody.appendChild(newRow);
+
+                newRow.querySelector('.removeProductRow').addEventListener('click', function () {
+                    tableBody.removeChild(newRow);
+                });
+            });
+        });
+    </script>
+}

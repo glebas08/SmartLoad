@@ -1,0 +1,54 @@
+﻿@model SmartLoad.Models.Order
+
+@{
+    ViewData["Title"] = "Редактировать заказ";
+}
+
+<h1>Редактировать заказ</h1>
+
+<form asp-action="EditOrder" method="post">
+    <!-- Поле ID (скрытое) -->
+    <input type="hidden" asp-for="Id" />
+
+    <!-- Название заказа -->
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название заказа</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <!-- Выбор клиента -->
+    <div class="form-group">
+        <label asp-for="DistributorId" class="control-label">Клиент</label>
+        <select asp-for="DistributorId" class="form-control" asp-items="ViewBag.Distributors">
+            <option value="">Выберите клиента</option>
+        </select>
+        <span asp-validation-for="DistributorId" class="text-danger"></span>
+    </div>
+
+    <!-- Дата доставки -->
+    <div class="form-group">
+        <label asp-for="DeliveryDate" class="control-label">Дата доставки</label>
+        <input asp-for="DeliveryDate" class="form-control" type="date" />
+        <span asp-validation-for="DeliveryDate" class="text-danger"></span>
+    </div>
+
+    <!-- Выбор точки маршрута -->
+    <div class="form-group">
+        <label asp-for="RoutePoint.Id" class="control-label">Точка выгрузки</label>
+        <select asp-for="RoutePoint.Id" class="form-control" asp-items="ViewBag.RoutePoints">
+            <option value="">Выберите точку маршрута</option>
+        </select>
+        <span asp-validation-for="RoutePoint.Id" class="text-danger"></span>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="@Url.Action("Orders", "Home")" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-//будет представлять маршрут, по которому будут доставляться заказы
-
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 namespace SmartLoad.Models
 {
     public class Rout
@@ -17,32 +14,20 @@ namespace SmartLoad.Models
         [Required(ErrorMessage = "Дата отправления обязательна")]
         [DataType(DataType.Date)]
         [Display(Name = "Дата отправления")]
-        public DateTime DepartureDate { get; set; }
+        public DateTime DepartureDate { get; set; } = DateTime.UtcNow;
 
         [Required(ErrorMessage = "Дата прибытия обязательна")]
         [DataType(DataType.Date)]
         [Display(Name = "Дата прибытия")]
-        public DateTime ArrivalDate { get; set; }
+        public DateTime ArrivalDate { get; set; }=DateTime.UtcNow.AddDays(7);
 
         [StringLength(500, ErrorMessage = "Примечания не должны превышать 500 символов")]
         [Display(Name = "Примечания")]
         public string Notes { get; set; }
+        [ValidateNever] 
+        public ICollection<RoutePointMapping> RoutePointMappings { get; set; }
 
-        // Навигационное свойство для точек маршрута
-        public ICollection<RoutePoint> RoutePoints { get; set; }
-
-        // Навигационное свойство для заказов
-        public ICollection<Order> Orders { get; set; }
-
-        // Навигационное свойство для схем погрузки
-        public ICollection<LoadingScheme> LoadingSchemes { get; set; }
-
-
-        public DateTime RouteDate { get; set; }
-
-        public void SetRouteDate(DateTime date)
-        {
-            RouteDate = DateTime.SpecifyKind(date, DateTimeKind.Utc);
-        }
+        //public List<RoutePoint> RoutePoints { get; set; } // Точки маршрута в данном маршруте
     }
 }
+

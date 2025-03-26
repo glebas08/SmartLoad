@@ -1,0 +1,336 @@
+﻿@* @model SmartLoad.ViewModels.LoadingSchemeResultViewModel
+
+@{
+    ViewData["Title"] = "Схема загрузки";
+}
+
+<h1>Схема загрузки</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Информация о транспортном средстве и маршруте</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Транспортное средство</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Регистрационный номер:</dt>
+                            <dd class="col-sm-8">@Model.Vehicle.RegistrationNumber</dd>
+                            
+                            <dt class="col-sm-4">Тип:</dt>
+                            <dd class="col-sm-8">@Model.Vehicle.VehicleType.Name</dd>
+                            
+                            <dt class="col-sm-4">Габариты (Д×Ш×В):</dt>
+                            <dd class="col-sm-8">@Model.Vehicle.VehicleType.Length × @Model.Vehicle.VehicleType.Width × @Model.Vehicle.VehicleType.Height м</dd>
+                            
+                            <dt class="col-sm-4">Грузоподъемность:</dt>
+                            <dd class="col-sm-8">@Model.Vehicle.VehicleType.LoadCapacity кг</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Маршрут</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Название:</dt>
+                            <dd class="col-sm-8">@Model.Route.Name</dd>
+                            
+                            <dt class="col-sm-4">Дата отправления:</dt>
+                            <dd class="col-sm-8">@Model.Route.DepartureDate.ToString("dd.MM.yyyy")</dd>
+                            
+                            <dt class="col-sm-4">Количество точек:</dt>
+                            <dd class="col-sm-8">@Model.Route.RoutePointMappings.Count</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Нагрузка на оси</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <canvas id="axleLoadChart" width="600" height="200"></canvas>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Расчетные нагрузки:</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Ось</th>
+                                    <th>Нагрузка (т)</th>
+                                    <th>Допустимо (т)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var axleLoad in Model.AxleLoads)
+                                {
+                                    var isOverloaded = false;
+                                    double maxLoad = 0;
+                                    
+                                    if (axleLoad.Key.Contains("Передняя ось тягача"))
+                                    {
+                                        maxLoad = 10.5;
+                                        isOverloaded = axleLoad.Value > maxLoad;
+                                    }
+                                    else if (axleLoad.Key.Contains("Задняя ось тягача"))
+                                    {
+                                        maxLoad = 11.5;
+                                        isOverloaded = axleLoad.Value > maxLoad;
+                                    }
+                                    else
+                                    {
+                                        maxLoad = 7.0; // Для осей полуприцепа (примерно)
+                                        isOverloaded = axleLoad.Value > maxLoad;
+                                    }
+                                    
+                                    <tr class="@(isOverloaded ? "table-danger" : "")">
+                                        <td>@axleLoad.Key</td>
+                                        <td>@axleLoad.Value.ToString("F2")</td>
+                                        <td>@maxLoad.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Схема размещения груза</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="loadingSchemeContainer" style="width: 100%; height: 500px; border: 1px solid #ccc; position: relative;">
+                            <!-- Здесь будет отображаться 3D-схема размещения груза -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h6>Список размещенных продуктов:</h6>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Продукт</th>
+                                    <th>Точка выгрузки</th>
+                                    <th>Координаты (X, Y, Z)</th>
+                                    <th>Вес (кг)</th>
+                                    <th>Габариты (Д×Ш×В)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var placement in Model.Placements)
+                                {
+                                    var product = Model.Orders
+                                        .SelectMany(o => o.OrderProducts)
+                                        .FirstOrDefault(op => op.Product.Id == placement.ProductId)?.Product;
+                                    
+                                    if (product != null)
+                                    {
+                                        <tr>
+                                            <td>@product.Name</td>
+                                            <td>@placement.Destination</td>
+                                            <td>(@placement.X, @placement.Y, @placement.Z)</td>
+                                            <td>@product.Weight</td>
+                                            <td>@product.Length × @product.Width × @product.Height</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Сохранение схемы загрузки</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="SaveScheme" method="post">
+                    <input type="hidden" name="Vehicle.Id" value="@Model.Vehicle.Id" />
+                    <input type="hidden" name="Route.Id" value="@Model.Route.Id" />
+                    
+                    @for (int i = 0; i < Model.Placements.Count; i++)
+                    {
+                        <input type="hidden" name="Placements[@i].ProductId" value="@Model.Placements[i].ProductId" />
+                        <input type="hidden" name="Placements[@i].X" value="@Model.Placements[i].X" />
+                        <input type="hidden" name="Placements[@i].Y" value="@Model.Placements[i].Y" />
+                        <input type="hidden" name="Placements[@i].Z" value="@Model.Placements[i].Z" />
+                        <input type="hidden" name="Placements[@i].Destination" value="@Model.Placements[i].Destination" />
+                    }
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">Сохранить схему загрузки</button>
+                        <a asp-action="Create" class="btn btn-secondary">Назад к выбору</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        // Создание графика нагрузки на оси
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('axleLoadChart').getContext('2d');
+            
+            var axleLabels = [];
+            var axleValues = [];
+            var axleLimits = [];
+            var backgroundColors = [];
+            
+            @foreach (var axleLoad in Model.AxleLoads)
+            {
+                <text>
+                axleLabels.push('@axleLoad.Key');
+                axleValues.push(@axleLoad.Value.ToString("F2"));
+                
+                var maxLoad = 0;
+                if ('@axleLoad.Key'.includes('Передняя ось тягача')) {
+                    maxLoad = 10.5;
+                } else if ('@axleLoad.Key'.includes('Задняя ось тягача')) {
+                    maxLoad = 11.5;
+                } else {
+                    maxLoad = 7.0;
+                }
+                
+                axleLimits.push(maxLoad);
+                
+                if (@axleLoad.Value > maxLoad) {
+                    backgroundColors.push('rgba(255, 99, 132, 0.6)');
+                } else {
+                    backgroundColors.push('rgba(75, 192, 192, 0.6)');
+                }
+                </text>
+            }
+            
+            var axleLoadChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: axleLabels,
+                    datasets: [
+                        {
+                            label: 'Нагрузка (т)',
+                            data: axleValues,
+                            backgroundColor: backgroundColors,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Допустимая нагрузка (т)',
+                            data: axleLimits,
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Нагрузка (т)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Инициализация 3D-визуализации размещения груза
+            initLoadingScheme3D();
+        });
+        
+        // Функция для инициализации 3D-визуализации
+        function initLoadingScheme3D() {
+            var container = document.getElementById('loadingSchemeContainer');
+            var width = container.clientWidth;
+            var height = container.clientHeight;
+            
+            // Создаем сцену, камеру и рендерер
+            var scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+            
+            var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(10, 10, 10);
+            
+            var renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+            
+            // Добавляем контроль орбиты для вращения камеры
+            var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.25;
+            
+            // Добавляем свет
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            // Создаем полуприцеп
+            var trailerWidth = @Model.Vehicle.VehicleType.Width;
+            var trailerLength = @Model.Vehicle.VehicleType.Length;
+            var trailerHeight = @Model.Vehicle.VehicleType.Height;
+            
+            var trailerGeometry = new THREE.BoxGeometry(trailerLength, trailerHeight, trailerWidth);
+            var trailerMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xcccccc, 
+                transparent: true, 
+                opacity: 0.3,
+                wireframe: false
+            });
+            var trailer = new THREE.Mesh(trailerGeometry, trailerMaterial);
+            trailer.position.set(trailerLength/2, trailerHeight/2, trailerWidth/2);
+            scene.add(trailer);
+            
+            // Добавляем продукты
+            @foreach (var placement in Model.Placements)
+            {
+                var product = Model.Orders
+                    .SelectMany(o => o.OrderProducts)
+                    .FirstOrDefault(op => op.Product.Id == placement.ProductId)?.Product;
+                
+                if (product != null)
+                {
+                    <text>
+                    var productGeometry = new THREE.BoxGeometry(@product.Length, @product.Height, @product.Width);
+                    
+                    // Генерируем случайный цвет для продукта
+                    var productColor = new THREE.Color(
+                        0.5 + Math.random() * 0.5,
+                        0.5 + Math.random() * 0.5,
+                        0.5 + Math.random() * 0.5
+                    );
+                    
+                    var productMaterial = new THREE.MeshPhongMaterial({ color: productColor });
+                    var productMesh = new THREE.Mesh(productGeometry, productMaterial);
+                    
+                    // Устанавливаем позицию продукта
+                    productMesh.position.set(
+                        @placement.X + @product.Length/2,
+                        @placement.Y + @product.Height/2,
+                        @placement.Z + @product.Width/
+ *@

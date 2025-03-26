@@ -53,7 +53,7 @@ namespace SmartLoad.Models
         public float FrontOverhang { get; set; }
 
         [Range(0, float.MaxValue, ErrorMessage = "Задний свес должен быть положительным числом")]
-        [Display(Name="Звдний свес")]
+        [Display(Name="Задний свес")]
         public float RearOverhang { get; set; }
 
         [Required(ErrorMessage = "Типы дорог обязательны")]
@@ -75,7 +75,7 @@ namespace SmartLoad.Models
         public float CouplingDevice { get; set; }
 
         [Range(0, float.MaxValue, ErrorMessage = "Расстояние до шкворня должно быть положительным числом")]
-        [Display(Name="Растояние ло шкворня")]
+        [Display(Name="Растояние до шкворня")]
         public float Kingpindist { get; set; }
 
         [Range(0, float.MaxValue, ErrorMessage = "Задний свес за сцепным устройством должен быть положительным числом")]

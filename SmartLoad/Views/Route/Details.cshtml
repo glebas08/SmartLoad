@@ -1,0 +1,99 @@
+﻿@model SmartLoad.Models.Rout
+
+@{
+    ViewData["Title"] = "Детали маршрута";
+}
+
+<h1>Детали маршрута</h1>
+
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Название
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Name
+        </dd>
+        <dt class="col-sm-2">
+            Дата отправления
+        </dt>
+        <dd class="col-sm-10">
+            @Model.DepartureDate.ToString("dd.MM.yyyy")
+        </dd>
+        <dt class="col-sm-2">
+            Дата прибытия
+        </dt>
+        <dd class="col-sm-10">
+            @Model.ArrivalDate.ToString("dd.MM.yyyy")
+        </dd>
+        <dt class="col-sm-2">
+            Примечания
+        </dt>
+        <dd class="col-sm-10">
+            @(string.IsNullOrEmpty(Model.Notes) ? "Нет примечаний" : Model.Notes)
+        </dd>
+    </dl>
+</div>
+
+<h2>Точки маршрута</h2>
+
+@if (Model.RoutePointMappings != null && Model.RoutePointMappings.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Порядок</th>
+                <th>Название точки</th>
+                <th>Ожидаемое время прибытия</th>
+                <th>Заказы</th>
+                <th>Примечания</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var mapping in Model.RoutePointMappings.OrderBy(m => m.OrderInRoute))
+            {
+                <tr>
+                    <td>@mapping.OrderInRoute</td>
+                    <td>@mapping.RoutePoint.Name</td>
+                    <td>
+                        @(mapping.EstimatedArrivalTime.HasValue
+                            ? mapping.EstimatedArrivalTime.Value.ToString("dd.MM.yyyy HH:mm")
+                            : "Не указано")
+                    </td>
+                    <td>
+                        @{
+                            var orders = ViewBag.Orders as Dictionary<int, List<string>>;
+                            if (orders != null && orders.ContainsKey(mapping.RoutePointId))
+                            {
+                                <ul>
+                                    @foreach (var orderName in orders[mapping.RoutePointId])
+                                    {
+                                        <li>@orderName</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <span>Нет заказов</span>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @(string.IsNullOrEmpty(mapping.Notes) ? "Нет примечаний" : mapping.Notes)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Для этого маршрута не добавлены точки.</p>
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
+    <a asp-action="Routes" class="btn btn-secondary">Назад к списку</a>
+</div>

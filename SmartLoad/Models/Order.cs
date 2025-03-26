@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace SmartLoad.Models
 {
@@ -12,35 +13,35 @@ namespace SmartLoad.Models
         [Display(Name = "Название")]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Дата заказа обязательна")]
+        [Required(ErrorMessage = "Клиент обязателен")]
+        public int DistributorId { get; set; }
+        [ForeignKey("DistributorId")]
+        public Distributor Distributor { get; set; }
+
+        [Required(ErrorMessage = "Дата доставки обязательна")]
         [DataType(DataType.Date)]
-        [Display(Name = "Дата заказа")]
-        public DateTime OrderDate { get; set; }
+        [Display(Name = "Дата доставки")]
+        public DateTime DeliveryDate { get; set; } = DateTime.UtcNow;
 
-        [Required(ErrorMessage = "Статус обязателен")]
-        [StringLength(100, ErrorMessage = "Статус должен быть не длиннее 100 символов")]
-        [Display(Name = "Статус")]
-        public string Status { get; set; }
+        // Поле для хранения идентификатора точки маршрута
+        [Required(ErrorMessage = "Точка маршрута обязательна")]
+        public int? RoutePointId { get; set; }
 
-        [StringLength(500, ErrorMessage = "Примечания не должны превышать 500 символов")]
-        [Display(Name = "Примечания")]
-        public string Notes { get; set; } = string.Empty; // Устанавливаем значение по умолчанию
-
-        // Связь с маршрутом
-        [Required(ErrorMessage = "Маршрут обязателен")]
-        public int RouteId { get; set; }
-
-        // Навигационное свойство для маршрута
-        [ForeignKey("RouteId")]
-        public SmartLoad.Models.Rout Rout { get; set; }
+        // Навигационное свойство для точки маршрута
+        public required RoutePoint RoutePoint { get; set; }
 
         // Навигационное свойство для продуктов в заказе
         public ICollection<OrderProduct> OrderProducts { get; set; }
 
         // Навигационное свойство для продуктов в схеме погрузки
+        [NotMapped]
+        [ValidateNever]
         public ICollection<LoadingProduct> LoadingProducts { get; set; }
 
-        // Навигационное свойство для точек маршрута
-        public ICollection<OrderRoutePoint> OrderRoutePoints { get; set; }
+        // Количество продуктов
+        [Required(ErrorMessage = "Количество продуктов обязательно")]
+        [Range(1, int.MaxValue, ErrorMessage = "Количество продуктов должно быть положительным числом")]
+        [Display(Name = "Количество продуктов")]
+        public int ColProducts { get; set; }
     }
 }

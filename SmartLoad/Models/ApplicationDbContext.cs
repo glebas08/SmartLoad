@@ -5,21 +5,22 @@ namespace SmartLoad.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<VehicleType> VehicleTypes { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<PackagingType> PackagingTypes { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderProduct> OrderProducts { get; set; }
-        public DbSet<SmartLoad.Models.Rout> Routes { get; set; } // Переименование в SmartLoad.Models.Route
-        public DbSet<RoutePoint> RoutePoints { get; set; }
-        public DbSet<LoadingScheme> LoadingSchemes { get; set; }
-        public DbSet<LoadingProduct> LoadingProducts { get; set; }
-        public DbSet<Vehicle> Vehicles { get; set; }
-        public DbSet<OrderRoutePoint> OrderRoutePoints { get; set; } // Добавляем новую модель
+        public DbSet<VehicleType> VehicleTypes { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<PackagingType> PackagingTypes { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderProduct> OrderProducts { get; set; } = null!;
+        public DbSet<Rout> Routes { get; set; } = null!;
+        public DbSet<RoutePoint> RoutePoints { get; set; } = null!;
+        public DbSet<LoadingScheme> LoadingSchemes { get; set; } = null!;
+        public DbSet<LoadingProduct> LoadingProducts { get; set; } = null!;
+        public DbSet<Vehicle> Vehicles { get; set; } = null!;
+        public DbSet<Distributor> Distributors { get; set; } = null!;
+
+        // Добавляем DbSet для RoutePointMapping
+        public DbSet<RoutePointMapping> RoutePointMappings { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,6 +40,9 @@ namespace SmartLoad.Data
                 .HasForeignKey(lp => lp.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Order>()
+                .HasKey(o => o.Id);
+
             // Связь между Order и OrderProduct
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.OrderProducts)
@@ -53,31 +57,18 @@ namespace SmartLoad.Data
                 .HasForeignKey(lp => lp.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Связь между Order и RoutePoint через OrderRoutePoint
+            // Связь один-к-одному между Order и RoutePoint
             modelBuilder.Entity<Order>()
-                .HasMany(o => o.OrderRoutePoints)
-                .WithOne(orp => orp.Order)
-                .HasForeignKey(orp => orp.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                 .HasOne(o => o.RoutePoint)
+                 .WithMany(rp => rp.Orders) // Добавляем навигационное свойство
+                 .HasForeignKey(o => o.RoutePointId)
+                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<RoutePoint>()
-                .HasMany(rp => rp.OrderRoutePoints)
-                .WithOne(orp => orp.RoutePoint)
-                .HasForeignKey(orp => orp.RoutePointId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Связь между Route и RoutePoint
-            modelBuilder.Entity<SmartLoad.Models.Rout>()
-                .HasMany(r => r.RoutePoints)
-                .WithOne(rp => rp.Rout)
-                .HasForeignKey(rp => rp.RouteId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Связь между Route и LoadingScheme
-            modelBuilder.Entity<SmartLoad.Models.Rout>()
-                .HasMany(r => r.LoadingSchemes)
-                .WithOne(ls => ls.Rout)
-                .HasForeignKey(ls => ls.RouteId)
+            // Связь между Order и Distributor
+            modelBuilder.Entity<Distributor>()
+                .HasMany(d => d.Orders)
+                .WithOne(o => o.Distributor)
+                .HasForeignKey(o => o.DistributorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Связь между LoadingScheme и Vehicle
@@ -122,21 +113,28 @@ namespace SmartLoad.Data
                 .HasForeignKey(ls => ls.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Настройка составного ключа для OrderRoutePoint
-            modelBuilder.Entity<OrderRoutePoint>()
-                .HasKey(orp => new { orp.OrderId, orp.RoutePointId });
+            //// Связь между RoutePoint и Rout (старая связь, можно постепенно удалить)
+            //modelBuilder.Entity<RoutePoint>()
+            //    .HasOne(rp => rp.Rout)
+            //    .WithMany(r => r.RoutePoints)
+            //    .HasForeignKey(rp => rp.RouteId)
+            //    .OnDelete(DeleteBehavior.SetNull); // Устанавливаем поведение при удалении на SetNull
 
-            modelBuilder.Entity<OrderRoutePoint>()
-                .HasOne(orp => orp.Order)
-                .WithMany(o => o.OrderRoutePoints)
-                .HasForeignKey(orp => orp.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // Настройте связь через промежуточную таблицу RoutePointMapping
+            modelBuilder.Entity<RoutePointMapping>()
+                .HasKey(rpm => rpm.Id); // Первичный ключ
 
-            modelBuilder.Entity<OrderRoutePoint>()
-                .HasOne(orp => orp.RoutePoint)
-                .WithMany(rp => rp.OrderRoutePoints)
-                .HasForeignKey(orp => orp.RoutePointId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RoutePointMapping>()
+                .HasOne(rpm => rpm.Route)
+                .WithMany(r => r.RoutePointMappings)
+                .HasForeignKey(rpm => rpm.RouteId)
+                .OnDelete(DeleteBehavior.Cascade); // При удалении маршрута удаляем все связи
+
+            modelBuilder.Entity<RoutePointMapping>()
+                .HasOne(rpm => rpm.RoutePoint)
+                .WithMany(rp => rp.RoutePointMappings)
+                .HasForeignKey(rpm => rpm.RoutePointId)
+                .OnDelete(DeleteBehavior.Cascade); // При удалении точки маршрута удаляем все связи
         }
     }
 }

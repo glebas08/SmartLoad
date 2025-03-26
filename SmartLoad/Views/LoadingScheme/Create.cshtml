@@ -1,0 +1,57 @@
+﻿@model SmartLoad.Models.LoadingSchemeCreateViewModel
+
+@{
+    ViewData["Title"] = "Создание схемы загрузки";
+}
+
+<h1>Создание схемы загрузки</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Выберите транспортное средство и маршрут</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group">
+                        <label asp-for="SelectedVehicleId" class="control-label"></label>
+                        <select asp-for="SelectedVehicleId" class="form-control">
+                            <option value="">-- Выберите транспортное средство --</option>
+                            @foreach (var vehicle in Model.Vehicles)
+                            {
+                                <option value="@vehicle.Id">@vehicle.Name - @vehicle.VehicleType.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="SelectedVehicleId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label asp-for="SelectedRouteId" class="control-label"></label>
+                        <select asp-for="SelectedRouteId" class="form-control">
+                            <option value="">-- Выберите маршрут --</option>
+                            @foreach (var route in Model.Routes)
+                            {
+                                <option value="@route.Id">@route.Name (@route.DepartureDate.ToString("dd.MM.yyyy"))</option>
+                            }
+                        </select>
+                        <span asp-validation-for="SelectedRouteId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary">Построить схему загрузки</button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

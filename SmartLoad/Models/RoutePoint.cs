@@ -1,16 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using SmartLoad.Models;
 using System.ComponentModel.DataAnnotations;
-
-// связь между заказами и точками маршрута, так как это много-ко-многим отношение.
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartLoad.Models
 {
     public class RoutePoint
     {
         public int Id { get; set; }
-
-        [Required(ErrorMessage = "ID маршрута обязателен")]
-        public int RouteId { get; set; }
 
         [Required(ErrorMessage = "Название точки маршрута обязательно")]
         [StringLength(100, ErrorMessage = "Название точки маршрута должно быть не длиннее 100 символов")]
@@ -20,15 +17,20 @@ namespace SmartLoad.Models
         [Required(ErrorMessage = "Дата выгрузки обязательна")]
         [DataType(DataType.Date)]
         [Display(Name = "Дата выгрузки")]
-        public DateTime UnloadingDate { get; set; }
+        public DateTime UnloadingDate { get; set; } = DateTime.UtcNow;
 
-        // Навигационное свойство для маршрута
-        public SmartLoad.Models.Rout Rout { get; set; }
+        //public int? RouteId { get; set; } // Сделали RouteId необязательным
+        //[ValidateNever]
+        //public Rout? Rout { get; set; } // Навигационное свойство для маршрута
+        
+        [ValidateNever]
+        public ICollection<RoutePointMapping> RoutePointMappings { get; set; } // Связь с RoutePointMapping
 
-        // Навигационное свойство для заказов через OrderRoutePoint
-        public ICollection<OrderRoutePoint> OrderRoutePoints { get; set; }
+        [ValidateNever]
+        public ICollection<Order> Orders { get; set; } // Заказы, связанные с точкой маршрута
 
-        // Навигационное свойство для продуктов в схеме погрузки
-        public ICollection<LoadingProduct> LoadingProducts { get; set; }
+        // Вычисляемое свойство для получения точек маршрута
+        [NotMapped]
+        public IEnumerable<RoutePoint> RoutePoints => RoutePointMappings?.Select(rpm => rpm.RoutePoint);
     }
 }

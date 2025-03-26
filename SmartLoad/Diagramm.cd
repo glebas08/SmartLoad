@@ -1,0 +1,6 @@
+﻿namespace SmartLoad.Models
+{
+    public class Diagramm
+    {
+    }
+}

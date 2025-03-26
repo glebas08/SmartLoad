@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Входные данные";
+}
+
+<h1>Входные данные</h1>
+
+<p>Пока данные заполняются вручную. В будущем можно добавить интеграцию с 1С:ERP через RabbitMQ.</p>
+
+<!-- Например, список для редактирования данных -->
+<div class="text-center">
+    <div class="btn-group-vertical">
+         <a class="btn btn-primary mb-2" asp-controller="Vehicle" asp-action="TypesOfVehicles">Типы ТС</a>
+        @* <a class="btn btn-primary mb-2" asp-controller="Home" asp-action="Vehicles">Транспортные средства</a> *@
+        <a class="btn btn-primary mb-2" asp-controller="Product" asp-action="Products">Готовая продукция</a>
+        <a class="btn btn-primary mb-2" asp-controller="PackagingTypes" asp-action="PackagingTypes">Типы упаковок</a>
+        <a class="btn btn-primary mb-2" asp-controller="Route" asp-action="Routes">Маршруты</a>
+        <a class="btn btn-primary mb-2" asp-controller="Order" asp-action="Orders">Заказы</a>
+    </div>
+</div>

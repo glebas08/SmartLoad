@@ -22,6 +22,29 @@ namespace SmartLoad.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SmartLoad.Models.Distributor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Distributors");
+                });
+
             modelBuilder.Entity("SmartLoad.Models.LoadingProduct", b =>
                 {
                     b.Property<int>("Id")
@@ -88,9 +111,6 @@ namespace SmartLoad.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int>("RouteId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -103,8 +123,6 @@ namespace SmartLoad.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RouteId");
 
                     b.HasIndex("VehicleId");
 
@@ -121,29 +139,27 @@ namespace SmartLoad.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ColProducts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DeliveryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DistributorId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("RouteId")
+                    b.Property<int>("RoutePointId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RouteId");
+                    b.HasIndex("DistributorId");
+
+                    b.HasIndex("RoutePointId");
 
                     b.ToTable("Orders");
                 });
@@ -172,24 +188,6 @@ namespace SmartLoad.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderProducts");
-                });
-
-            modelBuilder.Entity("SmartLoad.Models.OrderRoutePoint", b =>
-                {
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RoutePointId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("OrderId", "RoutePointId");
-
-                    b.HasIndex("RoutePointId");
-
-                    b.ToTable("OrderRoutePoints");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.PackagingType", b =>
@@ -269,9 +267,6 @@ namespace SmartLoad.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<DateTime>("RouteDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Id");
 
                     b.ToTable("Routes");
@@ -290,17 +285,44 @@ namespace SmartLoad.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("RouteId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("UnloadingDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
+                    b.ToTable("RoutePoints");
+                });
+
+            modelBuilder.Entity("SmartLoad.Models.RoutePointMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("EstimatedArrivalTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<int>("OrderInRoute")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RouteId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoutePointId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
                     b.HasIndex("RouteId");
 
-                    b.ToTable("RoutePoints");
+                    b.HasIndex("RoutePointId");
+
+                    b.ToTable("RoutePointMappings");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.Vehicle", b =>
@@ -440,7 +462,7 @@ namespace SmartLoad.Migrations
                         .IsRequired();
 
                     b.HasOne("SmartLoad.Models.RoutePoint", "RoutePoint")
-                        .WithMany("LoadingProducts")
+                        .WithMany()
                         .HasForeignKey("RoutePointId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -458,12 +480,6 @@ namespace SmartLoad.Migrations
 
             modelBuilder.Entity("SmartLoad.Models.LoadingScheme", b =>
                 {
-                    b.HasOne("SmartLoad.Models.Rout", "Rout")
-                        .WithMany("LoadingSchemes")
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SmartLoad.Models.Vehicle", "Vehicle")
                         .WithMany("LoadingSchemes")
                         .HasForeignKey("VehicleId")
@@ -476,8 +492,6 @@ namespace SmartLoad.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Rout");
-
                     b.Navigation("Vehicle");
 
                     b.Navigation("VehicleType");
@@ -485,13 +499,21 @@ namespace SmartLoad.Migrations
 
             modelBuilder.Entity("SmartLoad.Models.Order", b =>
                 {
-                    b.HasOne("SmartLoad.Models.Rout", "Rout")
+                    b.HasOne("SmartLoad.Models.Distributor", "Distributor")
                         .WithMany("Orders")
-                        .HasForeignKey("RouteId")
+                        .HasForeignKey("DistributorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Rout");
+                    b.HasOne("SmartLoad.Models.RoutePoint", "RoutePoint")
+                        .WithMany("Orders")
+                        .HasForeignKey("RoutePointId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Distributor");
+
+                    b.Navigation("RoutePoint");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.OrderProduct", b =>
@@ -513,25 +535,6 @@ namespace SmartLoad.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SmartLoad.Models.OrderRoutePoint", b =>
-                {
-                    b.HasOne("SmartLoad.Models.Order", "Order")
-                        .WithMany("OrderRoutePoints")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SmartLoad.Models.RoutePoint", "RoutePoint")
-                        .WithMany("OrderRoutePoints")
-                        .HasForeignKey("RoutePointId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("RoutePoint");
-                });
-
             modelBuilder.Entity("SmartLoad.Models.PackagingType", b =>
                 {
                     b.HasOne("SmartLoad.Models.Product", "Product")
@@ -543,15 +546,23 @@ namespace SmartLoad.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SmartLoad.Models.RoutePoint", b =>
+            modelBuilder.Entity("SmartLoad.Models.RoutePointMapping", b =>
                 {
-                    b.HasOne("SmartLoad.Models.Rout", "Rout")
-                        .WithMany("RoutePoints")
+                    b.HasOne("SmartLoad.Models.Rout", "Route")
+                        .WithMany("RoutePointMappings")
                         .HasForeignKey("RouteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Rout");
+                    b.HasOne("SmartLoad.Models.RoutePoint", "RoutePoint")
+                        .WithMany("RoutePointMappings")
+                        .HasForeignKey("RoutePointId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Route");
+
+                    b.Navigation("RoutePoint");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.Vehicle", b =>
@@ -565,6 +576,11 @@ namespace SmartLoad.Migrations
                     b.Navigation("VehicleType");
                 });
 
+            modelBuilder.Entity("SmartLoad.Models.Distributor", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("SmartLoad.Models.LoadingScheme", b =>
                 {
                     b.Navigation("LoadingProducts");
@@ -575,8 +591,6 @@ namespace SmartLoad.Migrations
                     b.Navigation("LoadingProducts");
 
                     b.Navigation("OrderProducts");
-
-                    b.Navigation("OrderRoutePoints");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.Product", b =>
@@ -588,18 +602,14 @@ namespace SmartLoad.Migrations
 
             modelBuilder.Entity("SmartLoad.Models.Rout", b =>
                 {
-                    b.Navigation("LoadingSchemes");
-
-                    b.Navigation("Orders");
-
-                    b.Navigation("RoutePoints");
+                    b.Navigation("RoutePointMappings");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.RoutePoint", b =>
                 {
-                    b.Navigation("LoadingProducts");
+                    b.Navigation("Orders");
 
-                    b.Navigation("OrderRoutePoints");
+                    b.Navigation("RoutePointMappings");
                 });
 
             modelBuilder.Entity("SmartLoad.Models.Vehicle", b =>

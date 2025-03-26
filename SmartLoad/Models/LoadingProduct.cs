@@ -41,14 +41,8 @@ namespace SmartLoad.Models
 
         // Навигационное свойство
         public LoadingScheme LoadingScheme { get; set; }
-
-        // Навигационное свойство
         public Product Product { get; set; }
-
-        // Навигационное свойство
         public Order Order { get; set; }
-
-        // Навигационное свойство
         public RoutePoint RoutePoint { get; set; }
 
         // Поле для хранения ID типа упаковки
@@ -68,7 +62,7 @@ namespace SmartLoad.Models
         public float PositionX { get; set; }
         public float PositionY { get; set; }
         public float PositionZ { get; set; }
-        public ProductDto Product { get; set; }
+        public ProductDto Name { get; set; }
         public PackagingTypeDto PackagingType { get; set; }
     }
 }

@@ -24,8 +24,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddControllersWithViews();
 
 // Регистрация сервиса для загрузки
-builder.Services.AddScoped<LoadingService>(); // Добавлено
-
+builder.Services.AddScoped<SmartLoad.Services.LoadingService>();
 // Построение приложения
 var app = builder.Build();
 
