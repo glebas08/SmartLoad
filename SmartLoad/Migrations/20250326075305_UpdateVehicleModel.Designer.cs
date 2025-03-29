@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SmartLoad.Data;
@@ -11,9 +12,11 @@ using SmartLoad.Data;
 namespace SmartLoad.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250326075305_UpdateVehicleModel")]
+    partial class UpdateVehicleModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -433,7 +436,12 @@ namespace SmartLoad.Migrations
                     b.Property<float>("TrailerWidth")
                         .HasColumnType("real");
 
+                    b.Property<int?>("VehicleTypeId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("VehicleTypeId");
 
                     b.ToTable("Vehicles");
                 });
@@ -651,6 +659,13 @@ namespace SmartLoad.Migrations
                     b.Navigation("RoutePoint");
                 });
 
+            modelBuilder.Entity("SmartLoad.Models.Vehicle", b =>
+                {
+                    b.HasOne("SmartLoad.Models.VehicleType", null)
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleTypeId");
+                });
+
             modelBuilder.Entity("SmartLoad.Models.Distributor", b =>
                 {
                     b.Navigation("Orders");
@@ -695,6 +710,8 @@ namespace SmartLoad.Migrations
             modelBuilder.Entity("SmartLoad.Models.VehicleType", b =>
                 {
                     b.Navigation("LoadingSchemes");
+
+                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

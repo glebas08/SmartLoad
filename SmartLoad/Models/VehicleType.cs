@@ -83,7 +83,7 @@ namespace SmartLoad.Models
         public float OverBeyond { get; set; }
 
         // Навигационное свойство для транспортных средств
-        public ICollection<Vehicle> Vehicles { get; set; }
+       //public ICollection<Vehicle> Vehicles { get; set; }
 
         // Навигационное свойство для схем погрузки
         public ICollection<LoadingScheme> LoadingSchemes { get; set; }

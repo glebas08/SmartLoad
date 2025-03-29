@@ -1,0 +1,44 @@
+﻿@model SmartLoad.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Удаление транспортного средства";
+}
+
+<h1>Удаление транспортного средства</h1>
+
+<h3>Вы уверены, что хотите удалить это транспортное средство?</h3>
+<div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Общая информация</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.RegistrationNumber)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.RegistrationNumber)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+                <dt class="col-sm-3">Тягач</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.TractorModel)</dd>
+
+                <dt class="col-sm-3">Полуприцеп</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.TrailerModel)</dd>
+
+                <dt class="col-sm-3">Грузоподъемность</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.TrailerMaxLoadCapacity) кг</dd>
+
+                <dt class="col-sm-3">Объем</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.TrailerMaxVolumeCapacity) м³</dd>
+            </dl>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Удалить" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+    </form>
+</div>
+

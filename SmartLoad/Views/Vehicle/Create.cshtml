@@ -1,0 +1,271 @@
+﻿@model SmartLoad.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Добавление транспортного средства";
+}
+
+<h1>Добавление транспортного средства</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Общая информация</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="RegistrationNumber" class="control-label"></label>
+                                <input asp-for="RegistrationNumber" class="form-control" />
+                                <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Name" class="control-label"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Notes" class="control-label"></label>
+                                <textarea asp-for="Notes" class="form-control"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Параметры тягача</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TractorModel" class="control-label"></label>
+                                <input asp-for="TractorModel" class="form-control" />
+                                <span asp-validation-for="TractorModel" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TractorEmptyWeight" class="control-label"></label>
+                                <input asp-for="TractorEmptyWeight" class="form-control" />
+                                <span asp-validation-for="TractorEmptyWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TractorAxleCount" class="control-label"></label>
+                                <input asp-for="TractorAxleCount" class="form-control" />
+                                <span asp-validation-for="TractorAxleCount" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorFrontAxleType" class="control-label"></label>
+                                <select asp-for="TractorFrontAxleType" class="form-control">
+                                    <option value="Односкатная">Односкатная</option>
+                                    <option value="Двускатная">Двускатная</option>
+                                </select>
+                                <span asp-validation-for="TractorFrontAxleType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorMaxFrontAxleLoad" class="control-label"></label>
+                                <input asp-for="TractorMaxFrontAxleLoad" class="form-control" />
+                                <span asp-validation-for="TractorMaxFrontAxleLoad" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorEmptyFrontAxleLoad" class="control-label"></label>
+                                <input asp-for="TractorEmptyFrontAxleLoad" class="form-control" />
+                                <span asp-validation-for="TractorEmptyFrontAxleLoad" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorMaxLoadCapacity" class="control-label"></label>
+                                <input asp-for="TractorMaxLoadCapacity" class="form-control" />
+                                <span asp-validation-for="TractorMaxLoadCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorRearAxleType" class="control-label"></label>
+                                <select asp-for="TractorRearAxleType" class="form-control">
+                                    <option value="Односкатная">Односкатная</option>
+                                    <option value="Двускатная">Двускатная</option>
+                                </select>
+                                <span asp-validation-for="TractorRearAxleType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorMaxRearAxleLoad" class="control-label"></label>
+                                <input asp-for="TractorMaxRearAxleLoad" class="form-control" />
+                                <span asp-validation-for="TractorMaxRearAxleLoad" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TractorEmptyRearAxleLoad" class="control-label"></label>
+                                <input asp-for="TractorEmptyRearAxleLoad" class="form-control" />
+                                <span asp-validation-for="TractorEmptyRearAxleLoad" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TractorWheelBase" class="control-label"></label>
+                                <input asp-for="TractorWheelBase" class="form-control" />
+                                <span asp-validation-for="TractorWheelBase" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TractorRearAxleToKingpin" class="control-label"></label>
+                                <input asp-for="TractorRearAxleToKingpin" class="form-control" />
+                                <span asp-validation-for="TractorRearAxleToKingpin" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Параметры полуприцепа</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TrailerModel" class="control-label"></label>
+                                <input asp-for="TrailerModel" class="form-control" />
+                                <span asp-validation-for="TrailerModel" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TrailerEmptyWeight" class="control-label"></label>
+                                <input asp-for="TrailerEmptyWeight" class="form-control" />
+                                <span asp-validation-for="TrailerEmptyWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TrailerAxleCount" class="control-label"></label>
+                                <input asp-for="TrailerAxleCount" class="form-control" />
+                                <span asp-validation-for="TrailerAxleCount" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerLength" class="control-label"></label>
+                                <input asp-for="TrailerLength" class="form-control" />
+                                <span asp-validation-for="TrailerLength" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerWidth" class="control-label"></label>
+                                <input asp-for="TrailerWidth" class="form-control" />
+                                <span asp-validation-for="TrailerWidth" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerHeight" class="control-label"></label>
+                                <input asp-for="TrailerHeight" class="form-control" />
+                                <span asp-validation-for="TrailerHeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerMaxVolumeCapacity" class="control-label"></label>
+                                <input asp-for="TrailerMaxVolumeCapacity" class="form-control" />
+                                <span asp-validation-for="TrailerMaxVolumeCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerAxleType" class="control-label"></label>
+                                <select asp-for="TrailerAxleType" class="form-control">
+                                    <option value="Односкатная">Односкатная</option>
+                                    <option value="Двускатная">Двускатная</option>
+                                </select>
+                                <span asp-validation-for="TrailerAxleType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerMaxAxleLoad" class="control-label"></label>
+                                <input asp-for="TrailerMaxAxleLoad" class="form-control" />
+                                <span asp-validation-for="TrailerMaxAxleLoad" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerKingpinToAxle" class="control-label"></label>
+                                <input asp-for="TrailerKingpinToAxle" class="form-control" />
+                                <span asp-validation-for="TrailerKingpinToAxle" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="TrailerAxleSpread" class="control-label"></label>
+                                <input asp-for="TrailerAxleSpread" class="form-control" />
+                                <span asp-validation-for="TrailerAxleSpread" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="TrailerMaxLoadCapacity" class="control-label"></label>
+                                <input asp-for="TrailerMaxLoadCapacity" class="form-control" />
+                                <span asp-validation-for="TrailerMaxLoadCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Создать" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

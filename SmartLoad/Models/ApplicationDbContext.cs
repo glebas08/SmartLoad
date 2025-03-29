@@ -99,12 +99,12 @@ namespace SmartLoad.Data
                 .HasForeignKey(lp => lp.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Связь между Vehicle и VehicleType
-            modelBuilder.Entity<Vehicle>()
-                .HasOne(v => v.VehicleType)
-                .WithMany(vt => vt.Vehicles)
-                .HasForeignKey(v => v.VehicleTypeId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //// Связь между Vehicle и VehicleType
+            //modelBuilder.Entity<Vehicle>()
+            //    .HasOne(v => v.VehicleType)
+            //    .WithMany(vt => vt.Vehicles)
+            //    .HasForeignKey(v => v.VehicleTypeId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             // Связь между Vehicle и LoadingScheme
             modelBuilder.Entity<Vehicle>()

@@ -1,0 +1,146 @@
+﻿@model SmartLoad.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Расчет нагрузок на оси";
+    var axleLoads = ViewBag.AxleLoads as Dictionary<string, float>;
+    var isValid = ViewBag.IsValid as bool? ?? false;
+    var cargoWeight = ViewBag.CargoWeight as float? ?? 0;
+    var cargoPosition = ViewBag.CargoPosition as float? ?? 0;
+}
+
+<h1>Расчет нагрузок на оси</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Параметры расчета</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="CalculateAxleLoads" method="post">
+                    <input type="hidden" name="id" value="@ViewBag.VehicleId" />
+
+                    <div class="form-group">
+                        <label for="cargoWeight" class="control-label">Вес груза (кг)</label>
+                        <input type="number" name="cargoWeight" id="cargoWeight" class="form-control" value="@cargoWeight" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cargoPositionFromKingpin" class="control-label">Расстояние от шкворня до центра тяжести груза (мм)</label>
+                        <input type="number" name="cargoPositionFromKingpin" id="cargoPositionFromKingpin" class="form-control" value="@cargoPosition" required />
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <input type="submit" value="Рассчитать" class="btn btn-primary" />
+                        <a asp-action="Details" asp-route-id="@ViewBag.VehicleId" class="btn btn-secondary">Назад к деталям</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @if (axleLoads != null)
+    {
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Результаты расчета</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert @(isValid ? "alert-success" : "alert-danger")">
+                        @if (isValid)
+                        {
+                            <p><strong>Нагрузки на оси в допустимых пределах</strong></p>
+                        }
+                        else
+                        {
+                            <p><strong>Внимание! Превышены допустимые нагрузки на оси!</strong></p>
+                        }
+                    </div>
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Ось</th>
+                                <th>Нагрузка (кг)</th>
+                                <th>Максимально допустимая (кг)</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Передняя ось тягача</td>
+                                <td>@axleLoads["TractorFrontAxle"].ToString("N0")</td>
+                                <td>@Model.TractorMaxFrontAxleLoad.ToString("N0")</td>
+                                <td>
+                                    @if (axleLoads["TractorFrontAxle"] <= Model.TractorMaxFrontAxleLoad)
+                                    {
+                                        <span class="badge bg-success">OK</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Превышение</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Задняя ось тягача</td>
+                                <td>@axleLoads["TractorRearAxle"].ToString("N0")</td>
+                                <td>@Model.TractorMaxRearAxleLoad.ToString("N0")</td>
+                                <td>
+                                    @if (axleLoads["TractorRearAxle"] <= Model.TractorMaxRearAxleLoad)
+                                    {
+                                        <span class="badge bg-success">OK</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Превышение</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Оси полуприцепа</td>
+                                <td>@axleLoads["TrailerAxles"].ToString("N0")</td>
+                                <td>@(Model.TrailerMaxAxleLoad * Model.TrailerAxleCount).ToString("N0")</td>
+                                <td>
+                                    @if (axleLoads["TrailerAxles"] <= Model.TrailerMaxAxleLoad * Model.TrailerAxleCount)
+                                    {
+                                        <span class="badge bg-success">OK</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Превышение</span>
+                                    }
+                                </td>
+                            </tr>
+							@*<tr>
+                                 <td>Нагрузка на шкворень</td>
+                                <td>@axleLoads["KingpinLoad"].ToString("N0")</td>
+                                <td>15000</td>
+                                <td>
+                                    @if (axleLoads["KingpinLoad"] <= 15000)
+                                    {
+                                        <span class="badge bg-success">OK</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Превышение</span>
+                                    }
+                                </td> 
+                            </tr>*@
+                        </tbody>
+                    </table>
+
+                    <div class="mt-3">
+                        <h5>Общая информация:</h5>
+                        <ul>
+                            <li>Вес груза: @cargoWeight.ToString("N0") кг</li>
+                            <li>Положение центра тяжести: @cargoPosition.ToString("N0") мм от шкворня</li>
+                            <li>Общий вес автопоезда с грузом: @((Model.TractorEmptyWeight + Model.TrailerEmptyWeight + cargoWeight).ToString("N0")) кг</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,225 @@
+﻿@model SmartLoad.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Детали транспортного средства";
+}
+
+<h1>Детали транспортного средства</h1>
+
+<div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Общая информация</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.RegistrationNumber)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.RegistrationNumber)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Name)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Name)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Notes)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Notes)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Параметры тягача</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorModel)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorModel)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorEmptyWeight)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorEmptyWeight) кг</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorAxleCount)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorAxleCount)</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Передняя ось</h5>
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorFrontAxleType)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorFrontAxleType)</dd>
+                        
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorMaxFrontAxleLoad)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorMaxFrontAxleLoad) кг</dd>
+                        
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorEmptyFrontAxleLoad)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorEmptyFrontAxleLoad) кг</dd>
+                    </dl>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>Задняя ось</h5>
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorRearAxleType)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorRearAxleType)</dd>
+                        
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorMaxRearAxleLoad)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorMaxRearAxleLoad) кг</dd>
+                        
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorEmptyRearAxleLoad)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorEmptyRearAxleLoad) кг</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorWheelBase)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorWheelBase) мм</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorRearAxleToKingpin)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorRearAxleToKingpin) мм</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TractorMaxLoadCapacity)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TractorMaxLoadCapacity) кг</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Параметры полуприцепа</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerModel)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerModel)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerEmptyWeight)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerEmptyWeight) кг</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerAxleCount)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerAxleCount)</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerLength)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerLength) мм</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerWidth)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerWidth) мм</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerHeight)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerHeight) мм</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerMaxVolumeCapacity)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerMaxVolumeCapacity) м³</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerAxleType)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerAxleType)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerMaxAxleLoad)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerMaxAxleLoad) кг</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerKingpinToAxle)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerKingpinToAxle) мм</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerAxleSpread)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerAxleSpread) мм</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">@Html.DisplayNameFor(model => model.TrailerMaxLoadCapacity)</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TrailerMaxLoadCapacity) кг</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">Общий вес пустого автопоезда</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TotalEmptyWeight) кг</dd>
+                    </dl>
+                </div>
+                <div class="col-md-4">
+                    <dl class="row">
+                        <dt class="col-sm-6">Общая грузоподъемность</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.TotalMaxLoadCapacity) кг</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
+    <a asp-action="CalculateAxleLoads" asp-route-id="@Model.Id" class="btn btn-success">Расчет нагрузок</a>
+    <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+</div>

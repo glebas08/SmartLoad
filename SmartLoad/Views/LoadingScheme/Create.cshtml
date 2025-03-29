@@ -22,7 +22,7 @@
                             <option value="">-- Выберите транспортное средство --</option>
                             @foreach (var vehicle in Model.Vehicles)
                             {
-                                <option value="@vehicle.Id">@vehicle.Name - @vehicle.VehicleType.Name</option>
+                                <option value="@vehicle.Id">@vehicle.Name - @vehicle.Name</option>
                             }
                         </select>
                         <span asp-validation-for="SelectedVehicleId" class="text-danger"></span>

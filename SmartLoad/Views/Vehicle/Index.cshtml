@@ -1,0 +1,45 @@
+﻿@model IEnumerable<SmartLoad.Models.Vehicle>
+
+@{
+    ViewData["Title"] = "Транспортные средства";
+}
+
+<h1>Транспортные средства</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Добавить новое ТС</a>
+</p>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.RegistrationNumber)</th>
+            <th>@Html.DisplayNameFor(model => model.Name)</th>
+            <th>@Html.DisplayNameFor(model => model.TractorModel)</th>
+            <th>@Html.DisplayNameFor(model => model.TrailerModel)</th>
+            <th>@Html.DisplayNameFor(model => model.TrailerMaxLoadCapacity)</th>
+            <th>@Html.DisplayNameFor(model => model.TrailerMaxVolumeCapacity)</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.RegistrationNumber)</td>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.TractorModel)</td>
+                <td>@Html.DisplayFor(modelItem => item.TrailerModel)</td>
+                <td>@Html.DisplayFor(modelItem => item.TrailerMaxLoadCapacity) кг</td>
+                <td>@Html.DisplayFor(modelItem => item.TrailerMaxVolumeCapacity) м³</td>
+                <td>
+                    <div class="btn-group">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Изменить</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Детали</a>
+                        <a asp-action="CalculateAxleLoads" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success">Расчет нагрузок</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
