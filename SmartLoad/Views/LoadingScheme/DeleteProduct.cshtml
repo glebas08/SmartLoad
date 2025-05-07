@@ -1,0 +1,53 @@
+﻿@model SmartLoad.Models.LoadingProduct
+
+@{
+    ViewData["Title"] = "Удаление продукта из схемы загрузки";
+}
+
+<h1>Удаление продукта из схемы загрузки</h1>
+
+<h3>Вы уверены, что хотите удалить этот продукт из схемы загрузки?</h3>
+<div>
+    <h4>Продукт в схеме загрузки</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Продукт
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Позиция X
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PositionX)
+        </dd>
+        <dt class="col-sm-2">
+            Позиция Y
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PositionY)
+        </dd>
+        <dt class="col-sm-2">
+            Позиция Z
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PositionZ)
+        </dd>
+        <dt class="col-sm-2">
+            Точка назначения
+        </dt>
+        <dd class="col-sm-10">
+            @(Model.RoutePoint != null ? Model.RoutePoint.Name : "Неизвестно")
+        </dd>
+
+    </dl>
+
+    <form asp-action="DeleteProduct">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" name="loadingSchemeId" value="@Model.LoadingSchemeId" />
+        <input type="submit" value="Удалить" class="btn btn-danger" />
+        <a asp-action="Details" asp-route-id="@Model.LoadingSchemeId" class="btn btn-secondary">Вернуться к деталям</a>
+    </form>
+</div>

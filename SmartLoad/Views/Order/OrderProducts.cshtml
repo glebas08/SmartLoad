@@ -27,8 +27,8 @@
                     <td>@product.Product.Name</td>
                     <td>@product.Quantity</td>
                     <td>
-                        <a asp-action="EditOrderProduct" asp-controller="Home" asp-route-id="@product.Id" asp-route-orderId="@orderId" class="btn btn-primary">Редактировать</a>
-                        <a asp-action="DeleteOrderProduct" asp-controller="Home" asp-route-id="@product.Id" asp-route-orderId="@orderId" class="btn btn-danger">Удалить</a>
+                        <a asp-action="EditOrderProduct" asp-controller="Order" asp-route-id="@product.Id" asp-route-orderId="@orderId" class="btn btn-primary">Редактировать</a>
+                        <a asp-action="DeleteOrderProduct" asp-controller="Order" asp-route-id="@product.Id" asp-route-orderId="@orderId" class="btn btn-danger">Удалить</a>
                     </td>
                 </tr>
             }

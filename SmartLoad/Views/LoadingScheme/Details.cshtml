@@ -1,203 +1,992 @@
-﻿@* @model SmartLoad.Models.LoadingScheme
+﻿@model SmartLoad.ViewModels.LoadingSchemeViewModel
 
 @{
     ViewData["Title"] = "Детали схемы загрузки";
+
+    // Получаем размеры полуприцепа из модели
+    var trailerLength = Model.LoadingScheme.Vehicle.TrailerLength; // Размеры в мм
+    var trailerWidth = Model.LoadingScheme.Vehicle.TrailerWidth;
+    var trailerHeight = Model.LoadingScheme.Vehicle.TrailerHeight;
+
+    // Определяем цвета для разных групп назначения
+    var colors = new[] {
+        0x3498db, 0x2ecc71, 0xe74c3c, 0xf39c12, 0x9b59b6,
+        0x1abc9c, 0x34495e, 0x16a085, 0x27ae60, 0x2980b9
+    };
 }
+
 
 <h1>Детали схемы загрузки</h1>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card mb-4">
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        <strong>Ошибка:</strong> @Model.ErrorMessage
+    </div>
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
             <div class="card-header">
                 <h5>Информация о схеме загрузки</h5>
             </div>
             <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Транспортное средство:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Vehicle.Name</dd>
+
+                    <dt class="col-sm-4">Маршрут:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Rout.Name</dd>
+
+                    <dt class="col-sm-4">Дата создания:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Статус:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Status</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Параметры полуприцепа</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Длина:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Vehicle.TrailerLength мм (@(Model.LoadingScheme.Vehicle.TrailerLength / 1000.0f) м)</dd>
+
+                    <dt class="col-sm-4">Ширина:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Vehicle.TrailerWidth мм (@(Model.LoadingScheme.Vehicle.TrailerWidth / 1000.0f) м)</dd>
+
+                    <dt class="col-sm-4">Высота:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Vehicle.TrailerHeight мм (@(Model.LoadingScheme.Vehicle.TrailerHeight / 1000.0f) м)</dd>
+
+                    <dt class="col-sm-4">Объем:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Vehicle.TrailerMaxVolumeCapacity м³</dd>
+
+                    <dt class="col-sm-4">Грузоподъемность:</dt>
+                    <dd class="col-sm-8">@Model.LoadingScheme.Vehicle.TrailerMaxLoadCapacity кг</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Добавляем блок с нагрузками на оси -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Нагрузки на оси</h5>
+            </div>
+            <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-sm-4">Транспортное средство:</dt>
-                            <dd class="col-sm-8">@Model.Vehicle.RegistrationNumber (@Model.Vehicle.VehicleType.Name)</dd>
-
-                            <dt class="col-sm-4">Маршрут:</dt>
-                            <dd class="col-sm-8">@Model.Route.Name</dd>
-
-                            <dt class="col-sm-4">Дата загрузки:</dt>
-                            <dd class="col-sm-8">@Model.LoadingDate.ToString("dd.MM.yyyy HH:mm")</dd>
-
-                            <dt class="col-sm-4">Статус:</dt>
-                            <dd class="col-sm-8">@Model.Status</dd>
-                        </dl>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Передняя ось тягача</h6>
+                                <h4>@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("TractorFrontAxle") ? Model.AxleLoads["TractorFrontAxle"].ToString("N0") : "N/A") кг</h4>
+                                <p class="@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("TractorFrontAxle") && Model.AxleLoads["TractorFrontAxle"] > Model.LoadingScheme.Vehicle.TractorMaxFrontAxleLoad ? "text-danger" : "text-success")">
+                                    Макс: @(Model.LoadingScheme.Vehicle.TractorMaxFrontAxleLoad.ToString("N0")) кг
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-sm-4">Примечания:</dt>
-                            <dd class="col-sm-8">@Model.Notes</dd>
-
-                            <dt class="col-sm-4">Количество продуктов:</dt>
-                            <dd class="col-sm-8">@Model.LoadingProducts.Count</dd>
-                        </dl>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Задняя ось тягача</h6>
+                                <h4>@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("TractorRearAxle") ? Model.AxleLoads["TractorRearAxle"].ToString("N0") : "N/A") кг</h4>
+                                <p class="@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("TractorRearAxle") && Model.AxleLoads["TractorRearAxle"] > Model.LoadingScheme.Vehicle.TractorMaxRearAxleLoad ? "text-danger" : "text-success")">
+                                    Макс: @(Model.LoadingScheme.Vehicle.TractorMaxRearAxleLoad.ToString("N0")) кг
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Оси полуприцепа</h6>
+                                <h4>@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("TrailerAxles") ? Model.AxleLoads["TrailerAxles"].ToString("N0") : "N/A") кг</h4>
+                                <p class="@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("TrailerAxles") && Model.AxleLoads["TrailerAxles"] > (Model.LoadingScheme.Vehicle.TrailerMaxAxleLoad * Model.LoadingScheme.Vehicle.TrailerAxleCount) ? "text-danger" : "text-success")">
+                                    Макс: @((Model.LoadingScheme.Vehicle.TrailerMaxAxleLoad * Model.LoadingScheme.Vehicle.TrailerAxleCount).ToString("N0")) кг
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Нагрузка на шкворень</h6>
+                                <h4>@(Model.AxleLoads != null && Model.AxleLoads.ContainsKey("KingpinLoad") ? Model.AxleLoads["KingpinLoad"].ToString("N0") : "N/A") кг</h4>
+                                <p>Рекомендуемая: 10000-15000 кг</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="card mb-4">
+<!-- Добавляем блок с информацией о весе груза и неразмещенных товарах -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
             <div class="card-header">
-                <h5>Схема размещения груза</h5>
+                <h5>Информация о размещении груза</h5>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-12">
-                        <div id="loadingSchemeContainer" style="width: 100%; height: 500px; border: 1px solid #ccc; position: relative;">
-                            <!-- Здесь будет отображаться 3D-схема размещения груза -->
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Общий вес груза</h6>
+                                @{
+                                    var totalPlannedWeight = Model.DestinationGroups
+                                    .SelectMany(g => g.Items)
+                                    .Sum(i => i.Product?.PackagingTypes?.FirstOrDefault()?.Weight ?? 0);
+                                    // Общее количество блоков
+                                    int totalItemCount = Model.DestinationGroups
+                                    .SelectMany(g => g.Items)
+                                    .Count();
+                                }
+                                <h4>@totalPlannedWeight.ToString("N0") кг</h4>
+                                <p><strong>Всего блоков:</strong> @totalItemCount</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Размещенный вес</h6>
+                                @{
+                                    float placedWeight = Model.DestinationGroups
+                                    .SelectMany(g => g.Items)
+                                    .Where(i => i.PositionX >= 0 && i.PositionY >= 0 && i.PositionZ >= 0)
+                                    .Sum(i => i.Product?.PackagingTypes?.FirstOrDefault()?.Weight ?? 0);
+                                    // Количество размещенных блоков
+                                    int placedItemCount = Model.DestinationGroups
+                                    .SelectMany(g => g.Items)
+                                    .Where(i => i.PositionX >= 0 && i.PositionY >= 0 && i.PositionZ >= 0)
+                                    .Count();
+                                }
+                                <h4>@placedWeight.ToString("N0") кг</h4>
+                                <p>@(((placedWeight / totalPlannedWeight) * 100).ToString("N1"))% от общего веса</p>
+                                <p><strong>Размещено блоков:</strong> @placedItemCount из @totalItemCount (@(((float)placedItemCount / totalItemCount * 100).ToString("N1"))%)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Неразмещенный вес</h6>
+                                @{
+                                    var unplacedItems = Model.DestinationGroups
+                                    .SelectMany(g => g.Items)
+                                    .Where(i => i.PositionX < 0 || i.PositionY < 0 || i.PositionZ < 0)
+                                    .ToList();
+
+                                    float unplacedWeight = unplacedItems.Sum(i => i.Product?.PackagingTypes?.FirstOrDefault()?.Weight ?? 0);
+                                    int unplacedCount = unplacedItems.Count;
+                                }
+                                <h4>@unplacedWeight.ToString("N0") кг</h4>
+                                <p>@(((unplacedWeight / totalPlannedWeight) * 100).ToString("N1"))% от общего веса</p>
+                                <p><strong>Количество неразмещенных блоков:</strong> @unplacedCount</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="row mt-4">
-                    <div class="col-md-12">
-                        <h6>Список размещенных продуктов:</h6>
-                        <table class="table table-striped">
+                <!-- Добавляем новый блок с информацией о порядке точек разгрузки -->
+                <div class="mt-4">
+                    <h6>Порядок точек разгрузки:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
                             <thead>
                                 <tr>
-                                    <th>Продукт</th>
-                                    <th>Точка выгрузки</th>
-                                    <th>Координаты (X, Y, Z)</th>
-                                    <th>Вес (кг)</th>
+                                    <th>Порядок</th>
+                                    <th>Точка маршрута</th>
+                                    <th>Цвет</th>
+                                    <th>Размещено блоков</th>
+                                    <th>Всего блоков</th>
+                                    <th>Процент размещения</th>
+                                    <th>Вес груза (кг)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var loadingProduct in Model.LoadingProducts)
+                                @{
+                                    // Получаем точки маршрута в порядке их следования
+                                    var routePoints = Model.LoadingScheme.Rout.RoutePointMappings
+                                    .OrderBy(rpm => rpm.OrderInRoute)
+                                    .Select(rpm => rpm.RoutePoint)
+                                    .ToList();
+
+                                    // Создаем словарь для сопоставления имени точки и группы назначения
+                                    var destinationGroupsByName = Model.DestinationGroups
+                                    .ToDictionary(g => g.Destination, g => g);
+                                }
+
+                                @for (int i = 0; i < routePoints.Count; i++)
                                 {
-                                    <tr>
-                                        <td>@loadingProduct.Product.Name</td>
-                                        <td>@loadingProduct.RoutePoint.Name</td>
-                                        <td>(@loadingProduct.PositionX, @loadingProduct.PositionY, @loadingProduct.PositionZ)</td>
-                                        <td>@loadingProduct.Product.Weight</td>
-                                    </tr>
+                                    var routePoint = routePoints[i];
+
+                                    // Пытаемся найти соответствующую группу назначения
+                                    if (destinationGroupsByName.TryGetValue(routePoint.Name, out var group))
+                                    {
+                                        int totalItems = group.Items.Count;
+                                        int placedItems = group.Items.Count(item => item.PositionX >= 0 && item.PositionY >= 0 && item.PositionZ >= 0);
+                                        float placementPercentage = totalItems > 0 ? (float)placedItems / totalItems * 100 : 0;
+                                        float groupWeight = group.Items.Sum(item => item.Product?.PackagingTypes?.FirstOrDefault()?.Weight ?? 0);
+
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>@routePoint.Name</td>
+                                            <td>
+                                                <div style="width: 20px; height: 20px; background-color: #@(colors[group.ColorIndex % colors.Length].ToString("X6"));"></div>
+                                            </td>
+                                            <td>@placedItems</td>
+                                            <td>@totalItems</td>
+                                            <td>@placementPercentage.ToString("N1")%</td>
+                                            <td>@groupWeight.ToString("N0")</td>
+                                        </tr>
+                                    }
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Вернуться на главную</a>
-            <a asp-action="Print" asp-route-id="@Model.Id" class="btn btn-primary">Печать схемы загрузки</a>
+                <!-- Легенда цветов для точек маршрута -->
+                <div class="mt-4">
+                    <h6>Цветовая легенда точек маршрута:</h6>
+                    <div class="row">
+                        @foreach (var group in Model.DestinationGroups)
+                        {
+                            <div class="col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 20px; height: 20px; background-color: #@(colors[group.ColorIndex % colors.Length].ToString("X6")); margin-right: 10px;"></div>
+                                    <span>@group.Destination</span>
+                                    @{
+                                        // Подсчитываем количество размещенных и общее количество блоков для этой точки
+                                        int groupTotalItems = group.Items.Count;
+                                        int groupPlacedItems = group.Items.Count(i => i.PositionX >= 0 && i.PositionY >= 0 && i.PositionZ >= 0);
+
+                                        // Находим порядковый номер точки в маршруте
+                                        int orderInRoute = -1;
+                                        var routePointMapping = Model.LoadingScheme.Rout.RoutePointMappings
+                                        .FirstOrDefault(rpm => rpm.RoutePoint.Name == group.Destination);
+                                        if (routePointMapping != null)
+                                        {
+                                            orderInRoute = routePointMapping.OrderInRoute;
+                                        }
+                                    }
+                                    <span class="ml-2">(@groupPlacedItems из @groupTotalItems) - Порядок: @(orderInRoute > 0 ? orderInRoute.ToString() : "N/A")</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Информация о неразмещенных товарах -->
+                @if (unplacedItems.Any())
+                {
+                    <div class="mt-4">
+                        <h6>Неразмещенные товары:</h6>
+                        <div class="table-responsive">
+                            @foreach (var group in Model.DestinationGroups)
+                            {
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Продукт</th>
+                                            <th>Размеры (мм)</th>
+                                            <th>Позиция от передней части (мм)</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in group.Items)
+                                        {
+                                            <tr>
+                                                <td>@item.ProductName</td>
+                                                <td>@item.Length x @item.Width x @item.Height</td>
+                                                <td>
+                                                    <span class="badge bg-primary">X: @item.PositionX</span>
+                                                    <span class="badge bg-success">Y: @item.PositionY</span>
+                                                    <span class="badge bg-info">Z: @item.PositionZ</span>
+                                                </td>
+                                                <td>
+                                                    <a asp-action="DeleteProduct" asp-route-id="@item.Id" asp-route-loadingSchemeId="@Model.LoadingScheme.Id" class="btn btn-danger btn-sm">Удалить</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-4 alert alert-success">
+                        Все товары успешно размещены в полуприцепе.
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
+
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="viewType">Тип отображения:</label>
+            <select id="viewType" class="form-control">
+                <option value="3D" selected="@(Model.ViewType == "3D")">3D</option>
+                <option value="2D-Top" selected="@(Model.ViewType == "2D-Top")">2D - Вид сверху</option>
+                <option value="2D-Side" selected="@(Model.ViewType == "2D-Side")">2D - Вид сбоку</option>
+            </select>
+        </div>
+    </div>
+
+</div>
+
+<div class="loading-scheme-container">
+    <div class="alert alert-info mb-3">
+        <h5><i class="fas fa-info-circle"></i> Информация о системе координат</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Система координат полуприцепа:</strong></p>
+                <ul>
+                    <li><strong>Начало координат (0,0,0):</strong> передний левый нижний угол полуприцепа (у кабины)</li>
+                    <li><strong>Ось X:</strong> направлена от передней части к задней (0 → @Model.LoadingScheme.Vehicle.TrailerLength мм)</li>
+                    <li><strong>Ось Y:</strong> направлена от левого борта к правому (0 → @Model.LoadingScheme.Vehicle.TrailerWidth мм)</li>
+                    <li><strong>Ось Z:</strong> направлена вверх от пола (0 → @Model.LoadingScheme.Vehicle.TrailerHeight мм)</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Пояснения к координатам груза:</strong></p>
+                <ul>
+                    <li><strong>X:</strong> расстояние от передней части полуприцепа (у кабины)</li>
+                    <li><strong>Y:</strong> расстояние от левого борта полуприцепа</li>
+                    <li><strong>Z:</strong> высота от пола полуприцепа</li>
+                    <li>Все размеры указаны в миллиметрах</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Схема системы координат полуприцепа</h5>
+                </div>
+                <div class="card-body text-center">
+                    <svg width="600" height="200" viewBox="0 0 600 200">
+                        <!-- Полуприцеп -->
+                        <rect x="50" y="50" width="500" height="100" fill="none" stroke="#000" stroke-width="2" />
+
+                        <!-- Оси координат -->
+                        <line x1="50" y1="150" x2="550" y2="150" stroke="#ff0000" stroke-width="2" />
+                        <line x1="50" y1="150" x2="50" y2="50" stroke="#0000ff" stroke-width="2" />
+                        <line x1="50" y1="150" x2="50" y2="200" stroke="#00ff00" stroke-width="2" />
+
+                        <!-- Стрелки -->
+                        <polygon points="550,150 540,145 540,155" fill="#ff0000" />
+                        <polygon points="50,50 45,60 55,60" fill="#0000ff" />
+                        <polygon points="50,200 45,190 55,190" fill="#00ff00" />
+
+                        <!-- Подписи -->
+                        <text x="300" y="170" text-anchor="middle" fill="#ff0000">Ось X (от передней части к задней)</text>
+                        <text x="30" y="100" text-anchor="middle" fill="#0000ff">Ось Z</text>
+                        <text x="30" y="180" text-anchor="middle" fill="#00ff00">Ось Y</text>
+
+                        <text x="50" y="40" text-anchor="middle" font-weight="bold">ПЕРЕД (X=0)</text>
+                        <text x="550" y="40" text-anchor="middle" font-weight="bold">ЗАД (X=@Model.LoadingScheme.Vehicle.TrailerLength)</text>
+
+                        <text x="50" y="165" text-anchor="middle" font-weight="bold">(0,0,0)</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="3d-container" style="width: 100%; height: 500px; border: 1px solid #ccc; @(Model.ViewType != "3D" ? "display:none;" : "")"></div>
+    <div id="2d-top-container" style="width: 100%; height: 500px; border: 1px solid #ccc; @(Model.ViewType != "2D-Top" ? "display:none;" : "")"></div>
+    <div id="2d-side-container" style="width: 100%; height: 500px; border: 1px solid #ccc; @(Model.ViewType != "2D-Side" ? "display:none;" : "")"></div>
+</div>
+
+<h2 class="mt-4">Продукты в схеме загрузки</h2>
+
+@foreach (var group in Model.DestinationGroups)
+{
+    <div class="destination-group" style="margin-bottom: 20px;">
+        <h4>@group.Destination</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Продукт</th>
+                    <th>Размеры</th>
+                    <th>Позиция (от задней части)</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in group.Items)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@item.Length x @item.Width x @item.Height</td>
+                        <td>
+                            X: @((trailerLength - item.PositionX - item.Length).ToString("N0")),
+                            Y: @item.PositionY.ToString("N0"),
+                            Z: @item.PositionZ.ToString("N0")
+                        </td>
+                        <td>
+                            <a asp-action="DeleteProduct" asp-route-id="@item.Id" asp-route-loadingSchemeId="@Model.LoadingScheme.Id" class="btn btn-danger btn-sm">Удалить</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
 
     <script>
-        // Функция для инициализации 3D-визуализации
+        // Данные о продуктах и их размещении
+        const loadingSchemeId = @Model.LoadingScheme.Id;
+        const destinationGroups = @Html.Raw(Json.Serialize(Model.DestinationGroups));
+        let currentViewType = '@Model.ViewType';
+        
+        // Цвета для разных групп назначения
+        const colors = [
+            0x3498db, 0x2ecc71, 0xe74c3c, 0xf39c12, 0x9b59b6,
+            0x1abc9c, 0x34495e, 0x16a085, 0x27ae60, 0x2980b9
+        ];
+        
+        // Размеры полуприцепа (в метрах)
+        const trailerLength = @(Model.LoadingScheme.Vehicle.TrailerLength / 1000.0f);
+        const trailerWidth = @(Model.LoadingScheme.Vehicle.TrailerWidth / 1000.0f);
+        const trailerHeight = @(Model.LoadingScheme.Vehicle.TrailerHeight / 1000.0f);
+        
+        // Глобальные переменные для 3D-сцены
+        let scene, camera, renderer, controls;
+        let is3DInitialized = false;
+        let is2DTopInitialized = false;
+        let is2DSideInitialized = false;
+        
+        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
-            var container = document.getElementById('loadingSchemeContainer');
-            var width = container.clientWidth;
-            var height = container.clientHeight;
+            // Инициализируем только текущий вид
+            initCurrentView();
+            
+            // Обработчик изменения типа отображения
+            document.getElementById('viewType').addEventListener('change', function() {
+                const newViewType = this.value;
+                
+                // Скрываем все контейнеры
+                document.getElementById('3d-container').style.display = 'none';
+                document.getElementById('2d-top-container').style.display = 'none';
+                document.getElementById('2d-side-container').style.display = 'none';
+                
+                // Показываем выбранный контейнер
+                document.getElementById(newViewType.toLowerCase() + '-container').style.display = 'block';
+                
+                // Инициализируем выбранный вид, если он еще не инициализирован
+                currentViewType = newViewType;
+                initCurrentView();
+                
+                // Сохраняем выбор пользователя через AJAX
+                saveViewPreference(newViewType);
+            });
+        });
+        
+        // Функция для инициализации текущего вида
+        function initCurrentView() {
+            if (currentViewType === '3D' && !is3DInitialized) {
+                init3DView();
+                is3DInitialized = true;
+            } else if (currentViewType === '2D-Top' && !is2DTopInitialized) {
+                init2DTopView();
+                is2DTopInitialized = true;
+            } else if (currentViewType === '2D-Side' && !is2DSideInitialized) {
+                init2DSideView();
+                is2DSideInitialized = true;
+            }
+        }
+        
+        // Функция для сохранения предпочтений пользователя
+                function saveViewPreference(viewType) {
+            fetch('@Url.Action("SaveViewPreference", "LoadingScheme")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    schemeId: loadingSchemeId,
+                    viewType: viewType
+                })
+            });
+        }
 
-            // Создаем сцену, камеру и рендерер
-            var scene = new THREE.Scene();
+
+               // Функция для инициализации 3D-вида
+        function init3DView() {
+            console.log("Инициализация 3D вида");
+            const container = document.getElementById('3d-container');
+
+            // Создание сцены, камеры и рендерера
+            scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf0f0f0);
 
-            var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera.position.set(10, 10, 10);
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(trailerLength * 1.5, trailerHeight * 1.5, trailerWidth * 1.5);
 
-            var renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(width, height);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = ''; // Очищаем контейнер перед добавлением
             container.appendChild(renderer.domElement);
 
-            // Добавляем контроль орбиты для вращения камеры
-            var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // Добавление элементов управления камерой
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.25;
 
-            // Добавляем свет
-            var ambientLight = new THREE.AmbientLight(0x404040);
+            // Добавление освещения
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
 
-            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            directionalLight.position.set(1, 1, 1);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(10, 10, 10);
             scene.add(directionalLight);
 
-            // Создаем полуприцеп
-            var trailerWidth = @Model.Vehicle.VehicleType.Width;
-            var trailerLength = @Model.Vehicle.VehicleType.Length;
-            var trailerHeight = @Model.Vehicle.VehicleType.Height;
-
-            var trailerGeometry = new THREE.BoxGeometry(trailerLength, trailerHeight, trailerWidth);
-            var trailerMaterial = new THREE.MeshPhongMaterial({
+            // Создание полуприцепа
+            const trailerGeometry = new THREE.BoxGeometry(trailerLength, trailerHeight, trailerWidth);
+            const trailerMaterial = new THREE.MeshPhongMaterial({
                 color: 0xcccccc,
                 transparent: true,
-                opacity: 0.3,
-                wireframe: false
+                opacity: 0.2
             });
-            var trailer = new THREE.Mesh(trailerGeometry, trailerMaterial);
-            trailer.position.set(trailerLength/2, trailerHeight/2, trailerWidth/2);
+            const trailer = new THREE.Mesh(trailerGeometry, trailerMaterial);
+            trailer.position.set(trailerLength / 2, trailerHeight / 2, trailerWidth / 2);
             scene.add(trailer);
+                    // Создаем метки для начала и конца полуприцепа
+            function createLabel(text, position, color = 0x000000) {
+                // Создаем канвас для текста
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 256;
+                canvas.height = 128;
 
-            // Добавляем продукты
-        @foreach (var loadingProduct in Model.LoadingProducts)
-        {
-            <text>
-                    var productGeometry = new THREE.BoxGeometry(
-                @loadingProduct.Product.Length,
-                @loadingProduct.Product.Height,
-                @loadingProduct.Product.Width
-                    );
+                // Настраиваем стиль текста
+                context.fillStyle = '#ffffff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.font = 'Bold 24px Arial';
+                context.fillStyle = '#' + color.toString(16).padStart(6, '0');
+                context.textAlign = 'center';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                    // Генерируем случайный цвет для продукта
-                    var productColor = new THREE.Color(
-                        0.5 + Math.random() * 0.5,
-                        0.5 + Math.random() * 0.5,
-                        0.5 + Math.random() * 0.5
-                    );
+                // Создаем текстуру из канваса
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.needsUpdate = true;
 
-                    var productMaterial = new THREE.MeshPhongMaterial({ color: productColor });
-                    var productMesh = new THREE.Mesh(productGeometry, productMaterial);
+                // Создаем материал с текстурой
+                const material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
 
-                    // Устанавливаем позицию продукта
-                    productMesh.position.set(
-                @loadingProduct.PositionX + @loadingProduct.Product.Length/2,
-                @loadingProduct.PositionY + @loadingProduct.Product.Height/2,
-                @loadingProduct.PositionZ + @loadingProduct.Product.Width/2
-                    );
+                // Создаем плоскость для текста
+                const geometry = new THREE.PlaneGeometry(1, 0.5);
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.copy(position);
 
-                    scene.add(productMesh);
-            </text>
-        }
+                // Добавляем метку на сцену
+                scene.add(mesh);
 
-            // Добавляем оси координат для ориентации
-            var axesHelper = new THREE.AxesHelper(5);
-            scene.add(axesHelper);
-
-            // Функция анимации
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
+                return mesh;
             }
 
-            // Запускаем анимацию
-            animate();
+            // Создаем метки для начала и конца полуприцепа
+            const frontLabel = createLabel('ПЕРЕД ПОЛУПРИЦЕПА', new THREE.Vector3(0.5, trailerHeight + 0.3, trailerWidth / 2), 0x3498db);
+            const rearLabel = createLabel('ЗАД ПОЛУПРИЦЕПА', new THREE.Vector3(trailerLength - 0.5, trailerHeight + 0.3, trailerWidth / 2), 0xe74c3c);
 
-            // Обработка изменения размера окна
-            window.addEventListener('resize', function() {
-                var width = container.clientWidth;
-                var height = container.clientHeight;
+            // Добавляем стрелки-указатели для направления осей
+            function createAxisArrow(direction, position, color) {
+                const arrowLength = 1.5;
+                const arrowHelper = new THREE.ArrowHelper(
+                    direction.normalize(),
+                    position,
+                    arrowLength,
+                    color,
+                    0.2,
+                    0.1
+                );
+                scene.add(arrowHelper);
 
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
+                return arrowHelper;
+            }
 
-                renderer.setSize(width, height);
+            // Создаем стрелки для осей координат
+            const xAxisArrow = createAxisArrow(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(-1, 0, 0),
+                0xff0000
+            );
+
+            const yAxisArrow = createAxisArrow(
+                new THREE.Vector3(0, 0, 1),
+                new THREE.Vector3(-1, 0, 0),
+                0x00ff00
+            );
+
+            const zAxisArrow = createAxisArrow(
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-1, 0, 0),
+                0x0000ff
+            );
+
+            // Добавляем подписи к осям
+            const xAxisLabel = createLabel('X', new THREE.Vector3(0.5, 0, 0), 0xff0000);
+            const yAxisLabel = createLabel('Y', new THREE.Vector3(-1, 0, 1), 0x00ff00);
+            const zAxisLabel = createLabel('Z', new THREE.Vector3(-1, 1, 0), 0x0000ff);
+
+            // Добавляем визуальные маркеры для начала и конца полуприцепа
+            function createMarker(position, color) {
+                const geometry = new THREE.SphereGeometry(0.1, 16, 16);
+                const material = new THREE.MeshBasicMaterial({ color: color });
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.copy(position);
+                scene.add(sphere);
+                return sphere;
+            }
+
+            // Маркеры для углов полуприцепа
+            const frontLeftBottom = createMarker(new THREE.Vector3(0, 0, 0), 0x3498db);
+            const frontRightBottom = createMarker(new THREE.Vector3(0, 0, trailerWidth), 0x3498db);
+            const rearLeftBottom = createMarker(new THREE.Vector3(trailerLength, 0, 0), 0xe74c3c);
+            const rearRightBottom = createMarker(new THREE.Vector3(trailerLength, 0, trailerWidth), 0xe74c3c);
+
+                    // Добавляем линии для обозначения направления движения
+            // Используем существующий lineMaterial или создаем новый с другим именем
+            const directionLineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
+
+            // Линия направления движения
+            const directionGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(trailerLength / 2, trailerHeight + 0.5, trailerWidth / 2),
+                new THREE.Vector3(trailerLength / 2 - 2, trailerHeight + 0.5, trailerWidth / 2)
+            ]);
+            const directionLine = new THREE.Line(directionGeometry, directionLineMaterial);
+            scene.add(directionLine);
+
+            // Стрелка направления движения
+            const arrowGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(trailerLength / 2 - 2, trailerHeight + 0.5, trailerWidth / 2),
+                new THREE.Vector3(trailerLength / 2 - 1.7, trailerHeight + 0.6, trailerWidth / 2),
+                new THREE.Vector3(trailerLength / 2 - 1.7, trailerHeight + 0.4, trailerWidth / 2),
+                new THREE.Vector3(trailerLength / 2 - 2, trailerHeight + 0.5, trailerWidth / 2)
+            ]);
+            const arrowLine = new THREE.Line(arrowGeometry, directionLineMaterial);
+            scene.add(arrowLine);
+
+
+            // Добавляем метку направления движения
+            const directionLabel = createLabel('НАПРАВЛЕНИЕ ДВИЖЕНИЯ',
+                new THREE.Vector3(trailerLength / 2 - 1, trailerHeight + 0.8, trailerWidth / 2), 0x000000);
+                // Добавляем толстые линии для каркаса
+                const edges = new THREE.EdgesGeometry(trailerGeometry);
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
+                const wireframe = new THREE.LineSegments(edges, lineMaterial);
+                wireframe.position.set(trailerLength / 2, trailerHeight / 2, trailerWidth / 2);
+                scene.add(wireframe);
+
+
+
+
+                // Добавление продуктов
+                destinationGroups.forEach((group, groupIndex) => {
+                    const color = colors[groupIndex % colors.length];
+
+                    console.log(`Группа ${group.destination}, количество элементов: ${group.items.length}`);
+
+                    group.items.forEach(item => {
+                        // Преобразуем миллиметры в метры для всех размеров
+                        const itemLength = item.length / 1000;
+                        const itemWidth = item.width / 1000;
+                        const itemHeight = item.height / 1000;
+                            console.log(`Размеры блока в метрах: ${itemLength}x${itemWidth}x${itemHeight}`);
+
+                        const boxGeometry = new THREE.BoxGeometry(itemLength, itemHeight, itemWidth);
+                        const boxMaterial = new THREE.MeshPhongMaterial({ color: color });
+                        const box = new THREE.Mesh(boxGeometry, boxMaterial);
+
+                        // Позиционирование продукта - исправлено
+                        // Важно очень: в Three.js Y - это вертикальная ось (высота), а в нашей модели Z - высота
+                        // Поэтому меняем местами Y и Z при отображении
+                        const posX = item.positionX / 1000;
+                        const posY = item.positionY / 1000;
+                        const posZ = item.positionZ / 1000;
+                        // Преобразуем позиции из миллиметров в метры
+                    
+
+                        console.log(`Блок: ${item.productName}`);
+                        console.log(`Размеры (м): ${itemLength}x${itemWidth}x${itemHeight}`);
+                        console.log(`Позиция (м): X=${posX}, Y=${posY}, Z=${posZ}`);
+
+                        // const boxGeometry = new THREE.BoxGeometry(itemLength, itemHeight, itemWidth);
+                        // const boxMaterial = new THREE.MeshPhongMaterial({ color: color });
+                        // const box = new THREE.Mesh(boxGeometry, boxMaterial);
+
+                        // Позиционирование продукта - центр блока должен быть в указанной позиции
+                               // Позиционирование продукта - центр блока должен быть в указанной позиции
+                            box.position.set(
+                Math.round((trailerLength - posX - itemLength + (itemLength / 2)) * 1000) / 1000,
+                Math.round((posZ + (itemHeight / 2)) * 1000) / 1000,
+                Math.round((posY + (itemWidth / 2)) * 1000) / 1000
+            );
+
+            // Добавляем подпись с координатами к блоку
+            if (itemLength > 0.5 && itemWidth > 0.5 && itemHeight > 0.5) {
+                const coordsText = `X:${posX.toFixed(0)}, Y:${posY.toFixed(0)}, Z:${posZ.toFixed(0)}`;
+                const coordsLabel = addTextLabel(coordsText,
+                    new THREE.Vector3(
+                        trailerLength - posX - itemLength/2,
+                        posZ + itemHeight + 0.1,
+                        posY + itemWidth/2
+                    ), 0.5, 0x000000);
+                coordsLabel.rotation.x = -Math.PI / 2; // Поворачиваем метку для лучшей видимости
+            }
+
+                        console.log(`Позиция блока в сцене: X=${box.position.x}, Y=${box.position.y}, Z=${box.position.z}`);
+
+                        scene.add(box);
+
+                        // Добавляем каркас для блока
+                           const boxEdges = new THREE.EdgesGeometry(boxGeometry);
+            const boxLine = new THREE.LineSegments(boxEdges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+            boxLine.position.copy(box.position);
+            scene.add(boxLine);
+                    });
+                });
+
+                // Добавление осей координат
+                const axesHelper = new THREE.AxesHelper(5);
+                scene.add(axesHelper);
+
+                // Автоматическое позиционирование камеры для охвата всей сцены
+                const box = new THREE.Box3().setFromObject(scene);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = camera.fov * (Math.PI / 180);
+                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+                cameraZ *= 1.5; // Увеличиваем расстояние для лучшего обзора
+
+                // Обновляем позицию камеры только если сцена не пуста
+                if (maxDim > 0) {
+                    camera.position.set(center.x, center.y, center.z + cameraZ);
+                    camera.lookAt(center);
+                }
+
+                // Функция анимации
+                function animate() {
+                    requestAnimationFrame(animate);
+                    controls.update();
+                    renderer.render(scene, camera);
+                }
+
+                animate();
+
+                // Обработка изменения размера окна
+                window.addEventListener('resize', function() {
+                    if (renderer) {
+                        camera.aspect = container.clientWidth / container.clientHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(container.clientWidth, container.clientHeight);
+                    }
+                });
+        }
+
+        // Функция для инициализации 2D-вида сверху
+        function init2DTopView() {
+            console.log("Инициализация 2D вида сверху");
+            const container = document.getElementById('2d-top-container');
+            container.innerHTML = ''; // Очищаем контейнер
+
+            const canvas = document.createElement('canvas');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            container.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Масштабирование для отображения полуприцепа на холсте
+            const scale = Math.min(
+                (canvas.width - 40) / trailerLength,
+                (canvas.height - 40) / trailerWidth
+            );
+
+            // Отрисовка полуприцепа
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(20, 20, trailerLength * scale, trailerWidth * scale);
+
+            // Добавляем подписи осей
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('Перед полуприцепа', 20, 15);
+            ctx.fillText('Зад полуприцепа', 20 + trailerLength * scale - 100, 15);
+
+            // Отрисовка продуктов
+            destinationGroups.forEach((group, groupIndex) => {
+                const color = '#' + colors[groupIndex % colors.length].toString(16).padStart(6, '0');
+
+                console.log(`Группа ${group.destination}, количество элементов: ${group.items.length}`);
+
+                group.items.forEach(item => {
+                    // Преобразуем позиции из миллиметров в метры
+                    const posX = item.positionX / 1000;
+                    const posY = item.positionY / 1000;
+
+                    // Размеры в метрах
+                    const itemLength = item.length / 1000;
+                    const itemWidth = item.width / 1000;
+
+                    console.log(`Блок 2D-Top: ${item.productName}`);
+                    console.log(`Размеры (м): ${itemLength}x${itemWidth}`);
+                    console.log(`Позиция (м): X=${posX}, Y=${posY}`);
+
+                    // Рисуем блок
+                    ctx.fillStyle = color;
+                    ctx.fillRect(
+                        20 + posX * scale,
+                        20 + posY * scale,
+                        itemLength * scale,
+                        itemWidth * scale
+                    );
+
+                    // Рисуем контур
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(
+                        20 + posX * scale,
+                        20 + posY * scale,
+                        itemLength * scale,
+                        itemWidth * scale
+                    );
+
+                    // Добавляем текст с названием продукта, если блок достаточно большой
+                    if (itemLength * scale > 40 && itemWidth * scale > 20) {
+                        ctx.fillStyle = '#000';
+                        ctx.font = '10px Arial';
+                        ctx.fillText(
+                            item.productName.substring(0, 10),
+                            20 + posX * scale + 5,
+                            20 + posY * scale + 15
+                        );
+                    }
+                });
             });
-        });
+        }
+
+        // Функция для инициализации 2D-вида сбоку
+        function init2DSideView() {
+            console.log("Инициализация 2D вида сбоку");
+            const container = document.getElementById('2d-side-container');
+            container.innerHTML = ''; // Очищаем контейнер
+
+            const canvas = document.createElement('canvas');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            container.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Масштабирование для отображения полуприцепа на холсте
+            const scale = Math.min(
+                (canvas.width - 40) / trailerLength,
+                (canvas.height - 40) / trailerHeight
+            );
+
+            // Отрисовка полуприцепа
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(20, 20, trailerLength * scale, trailerHeight * scale);
+
+            // Добавляем подписи
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('Перед полуприцепа', 20, 15);
+            ctx.fillText('Зад полуприцепа', 20 + trailerLength * scale - 100, 15);
+
+            // Отрисовка продуктов
+            destinationGroups.forEach((group, groupIndex) => {
+                const color = '#' + colors[groupIndex % colors.length].toString(16).padStart(6, '0');
+
+                console.log(`Группа ${group.destination}, количество элементов: ${group.items.length}`);
+
+                group.items.forEach(item => {
+                    // Преобразуем позиции из миллиметров в метры
+                    const posX = item.positionX / 1000;
+                    const posZ = item.positionZ / 1000;
+
+                    // Размеры в метрах
+                    const itemLength = item.length / 1000;
+                    const itemHeight = item.height / 1000;
+
+                    console.log(`Блок 2D-Side: ${item.productName}`);
+                    console.log(`Размеры (м): ${itemLength}x${itemHeight}`);
+                    console.log(`Позиция (м): X=${posX}, Z=${posZ}`);
+
+                    // Рисуем блок
+                    ctx.fillStyle = color;
+                    ctx.fillRect(
+                        20 + posX * scale,
+                        20 + posZ * scale,
+                        itemLength * scale,
+                        itemHeight * scale
+                    );
+
+                    // Рисуем контур
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(
+                        20 + posX * scale,
+                        20 + posZ * scale,
+                        itemLength * scale,
+                        itemHeight * scale
+                    );
+
+                    // Добавляем текст с названием продукта, если блок достаточно большой
+                    if (itemLength * scale > 40 && itemHeight * scale > 20) {
+                        ctx.fillStyle = '#000';
+                        ctx.font = '10px Arial';
+                        ctx.fillText(
+                            item.productName.substring(0, 10),
+                            20 + posX * scale + 5,
+                            20 + posZ * scale + 15
+                        );
+                    }
+                });
+            });
+        }
+
+        // Функция для выравнивания позиций блоков
+        function snapPosition(pos) {
+            // Округляем до 2 знаков после запятой для более точного отображения
+            return Math.round(pos * 100) / 100;
+        }
     </script>
 }
- *@
+

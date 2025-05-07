@@ -7,7 +7,7 @@ namespace SmartLoad.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<VehicleType> VehicleTypes { get; set; } = null!;
+        //public DbSet<VehicleType> VehicleTypes { get; set; } = null!;
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<PackagingType> PackagingTypes { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
@@ -18,9 +18,8 @@ namespace SmartLoad.Data
         public DbSet<LoadingProduct> LoadingProducts { get; set; } = null!;
         public DbSet<Vehicle> Vehicles { get; set; } = null!;
         public DbSet<Distributor> Distributors { get; set; } = null!;
-
-        // Добавляем DbSet для RoutePointMapping
         public DbSet<RoutePointMapping> RoutePointMappings { get; set; } = null!;
+        public DbSet<LoadingSchemeItem> LoadingSchemeItems { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,18 +78,18 @@ namespace SmartLoad.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Связь между LoadingScheme и VehicleType
-            modelBuilder.Entity<LoadingScheme>()
-                .HasOne(ls => ls.VehicleType)
-                .WithMany(vt => vt.LoadingSchemes)
-                .HasForeignKey(ls => ls.VehicleTypeId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<LoadingScheme>()
+            //    .HasOne(ls => ls.VehicleType)
+            //    .WithMany(vt => vt.LoadingSchemes)
+            //    .HasForeignKey(ls => ls.VehicleTypeId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             // Связь между LoadingProduct и LoadingScheme
-            modelBuilder.Entity<LoadingProduct>()
-                .HasOne(lp => lp.LoadingScheme)
-                .WithMany(ls => ls.LoadingProducts)
-                .HasForeignKey(lp => lp.LoadingSchemeId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<LoadingProduct>()
+            //    .HasOne(lp => lp.LoadingScheme)
+            //    .WithMany(ls => ls.LoadingProducts)
+            //    .HasForeignKey(lp => lp.LoadingSchemeId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             // Связь между LoadingProduct и Product
             modelBuilder.Entity<LoadingProduct>()
@@ -129,6 +128,18 @@ namespace SmartLoad.Data
                 .WithMany(r => r.RoutePointMappings)
                 .HasForeignKey(rpm => rpm.RouteId)
                 .OnDelete(DeleteBehavior.Cascade); // При удалении маршрута удаляем все связи
+
+            modelBuilder.Entity<LoadingSchemeItem>()
+                .HasOne(lsi => lsi.LoadingScheme)
+                .WithMany(ls => ls.LoadingSchemeItems)
+                .HasForeignKey(lsi => lsi.LoadingSchemeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LoadingSchemeItem>()
+                .HasOne(lsi => lsi.Product)
+                .WithMany()
+                .HasForeignKey(lsi => lsi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<RoutePointMapping>()
                 .HasOne(rpm => rpm.RoutePoint)

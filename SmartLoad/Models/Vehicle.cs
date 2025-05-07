@@ -8,6 +8,7 @@ namespace SmartLoad.Models
 {
     public class Vehicle
     {
+        #region Общее
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Регистрационный номер обязателен")]
@@ -23,7 +24,9 @@ namespace SmartLoad.Models
         [StringLength(500, ErrorMessage = "Примечания не должны превышать 500 символов")]
         [Display(Name = "Примечание")]
         public string Notes { get; set; }
+        #endregion
 
+        #region Параметры тягача
         // Параметры тягача
         [Required(ErrorMessage = "Модель тягача обязательна")]
         [StringLength(100, ErrorMessage = "Модель тягача не должна превышать 100 символов")]
@@ -84,7 +87,9 @@ namespace SmartLoad.Models
         [Range(0, float.MaxValue, ErrorMessage = "Максимальная грузоподъемность тягача должна быть положительным числом")]
         [Display(Name = "Макс. грузоподъемность тягача (кг)")]
         public float TractorMaxLoadCapacity { get; set; }
+        #endregion
 
+        #region Параметры полуприцепа
         // Параметры полуприцепа
         [Required(ErrorMessage = "Модель полуприцепа обязательна")]
         [StringLength(100, ErrorMessage = "Модель полуприцепа не должна превышать 100 символов")]
@@ -146,9 +151,11 @@ namespace SmartLoad.Models
         [Display(Name = "Макс. объем полуприцепа (м³)")]
         public float TrailerMaxVolumeCapacity { get; set; }
 
+        #endregion
+
         // Навигационные свойства
-        [ValidateNever] 
-        public ICollection<LoadingScheme> LoadingSchemes { get; set; }
+        [ValidateNever]
+        public List<LoadingScheme> LoadingSchemes { get; set; } = new List<LoadingScheme>();
 
         // Вычисляемые свойства
         [NotMapped]
@@ -245,6 +252,26 @@ namespace SmartLoad.Models
         public bool ValidateVolumeCapacity(float cargoVolume)
         {
             return cargoVolume <= TrailerMaxVolumeCapacity;
+        }
+
+        // Новый метод в классе Vehicle
+        public Dictionary<string, float> EstimateAxleLoads(float additionalWeight, float positionFromKingpin, Dictionary<string, float> currentLoads)
+        {
+            var newLoads = new Dictionary<string, float>();
+
+            // Упрощённый расчёт изменения нагрузок
+            float kingpinLoadDelta = additionalWeight * (TrailerLength - positionFromKingpin) / TrailerLength;
+            float trailerAxleDelta = additionalWeight - kingpinLoadDelta;
+
+            newLoads["TractorFrontAxle"] = currentLoads["TractorFrontAxle"] +
+                kingpinLoadDelta * (TractorRearAxleToKingpin / TractorWheelBase);
+
+            newLoads["TractorRearAxle"] = currentLoads["TractorRearAxle"] +
+                kingpinLoadDelta * (1 - TractorRearAxleToKingpin / TractorWheelBase);
+
+            newLoads["TrailerAxles"] = currentLoads["TrailerAxles"] + trailerAxleDelta;
+
+            return newLoads;
         }
 
         // Метод для проверки, помещается ли груз в полуприцеп по весу

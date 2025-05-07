@@ -28,63 +28,77 @@ namespace SmartLoad.Controllers
             return View(new Rout { RoutePointMappings = new List<RoutePointMapping>() });
         }
 
-        [HttpGet]
-        public IActionResult GetOrderByRoutePoint(int routePointId)
+        public JsonResult GetOrdersByRoutePoint(int routePointId)
         {
-            var order = _context.Orders
-                .FirstOrDefault(o => o.RoutePointId == routePointId);
+            var orders = _context.Orders
+                .Where(o => o.RoutePointId == routePointId)
+                .Select(o => new { id = o.Id, name = o.Name })
+                .ToList();
 
-            if (order == null)
+            if (orders.Any())
             {
-                return Json(new { name = "Нет заказа", id = 0 });
+                return Json(orders);
             }
-
-            return Json(new { name = order.Name, id = order.Id });
+            return Json(new[] { new { id = 0, name = "Нет заказов" } });
         }
 
+
+        //[HttpGet]
+        //public IActionResult GetOrderByRoutePoint(int routePointId)
+        //{
+        //    var order = _context.Orders
+        //        .FirstOrDefault(o => o.RoutePointId == routePointId);
+
+        //    if (order == null)
+        //    {
+        //        return Json(new { name = "Нет заказа", id = 0 });
+        //    }
+
+        //    return Json(new { name = order.Name, id = order.Id });
+        //}
+
         [HttpPost]
-        public IActionResult AddRoute(Rout routeModel, int[] selectedRoutePointIds, int[] orderInRoute)
+        public async Task<IActionResult> AddRoute(Rout route, int[] selectedRoutePointIds, int[] orderInRoute, int[][] selectedOrderIds)
         {
             if (ModelState.IsValid)
             {
-                // Преобразование дат в UTC
-                routeModel.DepartureDate = DateTime.SpecifyKind(routeModel.DepartureDate, DateTimeKind.Utc);
-                routeModel.ArrivalDate = DateTime.SpecifyKind(routeModel.ArrivalDate, DateTimeKind.Utc);
+                // Преобразуем даты в UTC
+                route.DepartureDate = DateTime.SpecifyKind(route.DepartureDate, DateTimeKind.Utc);
+                route.ArrivalDate = DateTime.SpecifyKind(route.ArrivalDate, DateTimeKind.Utc);
 
-                // Сначала сохраняем маршрут, чтобы получить его Id
-                _context.Routes.Add(routeModel);
-                _context.SaveChanges();
+                _context.Routes.Add(route);
+                await _context.SaveChangesAsync();
 
-                // Добавляем точки маршрута через промежуточную таблицу
-                if (selectedRoutePointIds != null && selectedRoutePointIds.Length > 0)
+                // Создаем маппинги для точек маршрута
+                if (selectedRoutePointIds != null && orderInRoute != null &&
+                    selectedRoutePointIds.Length == orderInRoute.Length)
                 {
                     for (int i = 0; i < selectedRoutePointIds.Length; i++)
                     {
-                        var routePointId = selectedRoutePointIds[i];
-                        var order = (orderInRoute != null && i < orderInRoute.Length) ? orderInRoute[i] : i + 1;
-
-                        var routePoint = _context.RoutePoints.FirstOrDefault(rp => rp.Id == routePointId);
-                        if (routePoint != null)
+                        var mapping = new RoutePointMapping
                         {
-                            var mapping = new RoutePointMapping
-                            {
-                                RouteId = routeModel.Id,
-                                RoutePointId = routePointId,
-                                OrderInRoute = order,
-                                EstimatedArrivalTime = routePoint.UnloadingDate
-                            };
-                            _context.RoutePointMappings.Add(mapping);
-                        }
+                            RouteId = route.Id,
+                            RoutePointId = selectedRoutePointIds[i],
+                            OrderInRoute = orderInRoute[i]
+                        };
+                        _context.RoutePointMappings.Add(mapping);
                     }
-                    _context.SaveChanges();
+
+                    await _context.SaveChangesAsync();
                 }
+
+                // Обратите внимание: мы не изменяем модель Order, так как связь 
+                // между заказами и маршрутами уже установлена через RoutePoint
+                // Заказы уже привязаны к точкам маршрута через поле RoutePointId
 
                 return RedirectToAction("Routes");
             }
 
-            ViewBag.AvailableRoutePoints = _context.RoutePoints.ToList();
-            return View(routeModel);
+            // Если модель невалидна, возвращаем представление с ошибками
+            ViewBag.AvailableRoutePoints = await _context.RoutePoints.ToListAsync();
+            return View(route);
         }
+
 
 
 
@@ -101,23 +115,30 @@ namespace SmartLoad.Controllers
                 return NotFound();
             }
 
+            // Получаем Id точек, которыее уже добавленны к маршруту
+            var existingRoutePointIds = route.RoutePointMappings.Select(rpm => rpm.RoutePointId).ToList();
+
             // Изменение: Получаем доступные точки, которые еще не добавлены к маршруту
             ViewBag.AvailableRoutePoints = _context.RoutePoints
-                .Where(rp => !route.RoutePointMappings.Any(rpm => rpm.RoutePointId == rp.Id))
+                .Where(rp => !existingRoutePointIds.Contains(rp.Id))
                 .ToList();
 
             return View(route);
         }
 
         [HttpPost]
-        public IActionResult EditRoute(Rout route, int[] selectedRoutePointIds, int[] orderInRoute) // Изменение: добавлены параметры
+        public IActionResult EditRoute(Rout route, int[] selectedRoutePointIds, int[] orderInRoute)
         {
             if (ModelState.IsValid)
             {
+                // Преобразуем даты в UTC
+                route.DepartureDate = DateTime.SpecifyKind(route.DepartureDate, DateTimeKind.Utc);
+                route.ArrivalDate = DateTime.SpecifyKind(route.ArrivalDate, DateTimeKind.Utc);
+
                 // Обновляем основные данные маршрута
                 _context.Routes.Update(route);
 
-                // Изменение: Получаем текущие маппинги
+                // Получаем текущие маппинги
                 var existingMappings = _context.RoutePointMappings
                     .Where(rpm => rpm.RouteId == route.Id)
                     .ToList();
@@ -145,7 +166,10 @@ namespace SmartLoad.Controllers
                                 RouteId = route.Id,
                                 RoutePointId = routePointId,
                                 OrderInRoute = order,
-                                EstimatedArrivalTime = existingRoutePoint.UnloadingDate
+                                // Преобразуем дату в UTC
+                                EstimatedArrivalTime = existingRoutePoint.UnloadingDate.Kind != DateTimeKind.Utc
+                                    ? DateTime.SpecifyKind(existingRoutePoint.UnloadingDate, DateTimeKind.Utc)
+                                    : existingRoutePoint.UnloadingDate
                             };
                             _context.RoutePointMappings.Add(mapping);
                         }
@@ -155,19 +179,23 @@ namespace SmartLoad.Controllers
 
                 return RedirectToAction("Routes");
             }
-
             // Если модель невалидна, заново загружаем данные
             var routeWithMappings = _context.Routes
                 .Include(r => r.RoutePointMappings)
                 .ThenInclude(rpm => rpm.RoutePoint)
                 .FirstOrDefault(r => r.Id == route.Id);
 
+            // Получаем ID точек, которые уже добавлены к маршруту
+            var existingRoutePointIds = routeWithMappings.RoutePointMappings.Select(rpm => rpm.RoutePointId).ToList();
+
+            // Получаем доступные точки, которые еще не добавлены к маршруту
             ViewBag.AvailableRoutePoints = _context.RoutePoints
-                .Where(rp => !routeWithMappings.RoutePointMappings.Any(rpm => rpm.RoutePointId == rp.Id))
+                .Where(rp => !existingRoutePointIds.Contains(rp.Id))
                 .ToList();
 
             return View(routeWithMappings);
         }
+
 
         public IActionResult DeleteRoute(int id)
         {

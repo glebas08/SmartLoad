@@ -6,7 +6,7 @@
     var loadingScheme = ViewBag.LoadingScheme as SmartLoad.Models.LoadingScheme;
 }
 
-<h1>Детали схемы погрузки: @(loadingScheme?.VehicleType.Name ?? "Неизвестный тип ТС")</h1>
+<h1>Детали схемы погрузки: @(loadingScheme?.Vehicle.Name ?? "Неизвестный тип ТС")</h1>
 
 <div>
     <h4>Информация о схеме погрузки</h4>
@@ -27,9 +27,9 @@
         <dt class="col-sm-2">
             Примечания
         </dt>
-        <dd class="col-sm-10">
+        @* <dd class="col-sm-10">
             @(loadingScheme?.Notes ?? "Нет примечаний")
-        </dd>
+        </dd> *@
     </dl>
 </div>
 

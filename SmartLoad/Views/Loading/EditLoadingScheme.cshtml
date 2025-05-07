@@ -1,4 +1,4 @@
-﻿@model SmartLoad.Models.LoadingScheme
+﻿@* @model SmartLoad.Models.LoadingScheme
 
 @{
     ViewData["Title"] = "Редактировать схему погрузки";
@@ -29,7 +29,7 @@
             <option value="">Выберите маршрут</option>
         </select>
         <span asp-validation-for="RouteId" class="text-danger"></span>
-    </div> *@
+    </div> 
     <div class="form-group">
         <label asp-for="LoadingDate" class="control-label"></label>
         <input asp-for="LoadingDate" class="form-control" type="date" />
@@ -53,4 +53,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-}
+} *@

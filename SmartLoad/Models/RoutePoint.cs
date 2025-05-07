@@ -31,6 +31,7 @@ namespace SmartLoad.Models
 
         // Вычисляемое свойство для получения точек маршрута
         [NotMapped]
+        [ValidateNever]
         public IEnumerable<RoutePoint> RoutePoints => RoutePointMappings?.Select(rpm => rpm.RoutePoint);
     }
 }

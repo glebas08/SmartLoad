@@ -1,0 +1,51 @@
+{
+  "loadingSchemeId": 20,
+  "trailer": {
+    "length": 13620,
+    "width": 2480,
+    "height": 3000
+  },
+  "cargoItems": [
+    {
+      "id": 214,
+      "productName": "Джинн140",
+      "destination": "Миасс",
+      "dimensions": {
+        "length": 1000,
+        "width": 1000,
+        "height": 1000
+      },
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "position3D": {
+        "x": 500,
+        "y": 500,
+        "z": 500
+      }
+    },
+    {
+      "id": 215,
+      "productName": "Блок240",
+      "destination": "Чебаркуль",
+      "dimensions": {
+        "length": 1000,
+        "width": 1000,
+        "height": 1000
+      },
+      "position": {
+        "x": 1500,
+        "y": 0,
+        "z": 0
+      },
+      "position3D": {
+        "x": 2000,
+        "y": 500,
+        "z": 500
+      }
+    }
+  ],
+  "timestamp": "2025-04-04T08:29:36.326Z"
+}

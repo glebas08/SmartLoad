@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 namespace SmartLoad.Models
 {
@@ -27,7 +28,13 @@ namespace SmartLoad.Models
         [ValidateNever] 
         public ICollection<RoutePointMapping> RoutePointMappings { get; set; }
 
+        [NotMapped]
+        [ValidateNever]
+        public IEnumerable<RoutePoint> RoutePoints => RoutePointMappings?.Select(rpm => rpm.RoutePoint) ?? Enumerable.Empty<RoutePoint>();
+
+
         //public List<RoutePoint> RoutePoints { get; set; } // Точки маршрута в данном маршруте
+        public List<LoadingScheme> LoadingSchemes { get; set; } = new List<LoadingScheme>();
     }
 }
 

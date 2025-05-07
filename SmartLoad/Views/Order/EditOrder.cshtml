@@ -35,17 +35,17 @@
 
     <!-- Выбор точки маршрута -->
     <div class="form-group">
-        <label asp-for="RoutePoint.Id" class="control-label">Точка выгрузки</label>
-        <select asp-for="RoutePoint.Id" class="form-control" asp-items="ViewBag.RoutePoints">
+        <label asp-for="RoutePointId" class="control-label">Точка выгрузки</label>
+        <select asp-for="RoutePointId" class="form-control" asp-items="ViewBag.RoutePoints">
             <option value="">Выберите точку маршрута</option>
         </select>
-        <span asp-validation-for="RoutePoint.Id" class="text-danger"></span>
+        <span asp-validation-for="RoutePointId" class="text-danger"></span>
     </div>
 
     <!-- Кнопки действий -->
     <div class="form-group mt-3">
         <button type="submit" class="btn btn-primary">Сохранить</button>
-        <a href="@Url.Action("Orders", "Home")" class="btn btn-secondary">Отмена</a>
+        <a href="@Url.Action("Orders", "Order")" class="btn btn-secondary">Отмена</a>
     </div>
 </form>
 

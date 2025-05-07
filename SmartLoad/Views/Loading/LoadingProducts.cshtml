@@ -5,7 +5,7 @@
     var loadingScheme = ViewBag.LoadingScheme as SmartLoad.Models.LoadingScheme;
 }
 
-<h1>Продукты в схеме погрузки: @(loadingScheme?.VehicleType.Name ?? "Неизвестный тип ТС")</h1>
+<h1>Продукты в схеме погрузки: @(loadingScheme?.Vehicle.Name ?? "Неизвестный тип ТС")</h1>
 
 <a href="@Url.Action("AddLoadingProduct", "Loading", new { loadingSchemeId })" class="btn btn-success">Добавить продукт</a>
 <a href="@Url.Action("LoadingSchemes", "Loading")" class="btn btn-secondary">Назад к схемам погрузки</a>

@@ -100,7 +100,7 @@ namespace SmartLoad.Controllers
 
         public IActionResult EditOrder(int id)
         {
-            // Ищем заказ по ID
+            // Ищем заказ по ID с включением связанных данных
             var order = _context.Orders
                 .Include(o => o.RoutePoint)
                 .Include(o => o.Distributor)
@@ -112,20 +112,30 @@ namespace SmartLoad.Controllers
             }
 
             // Заполняем ViewBag для выпадающих списков
-            ViewData["RoutePointId"] = new SelectList(_context.RoutePoints, "Id", "Name", order.RoutePoint.Id);
-            ViewData["DistributorId"] = new SelectList(_context.Distributors, "Id", "Name", order.DistributorId);
+            // Используем правильные имена полей, соответствующие представлению
+            ViewBag.RoutePoints = new SelectList(_context.RoutePoints, "Id", "Name", order.RoutePointId);
+            ViewBag.Distributors = new SelectList(_context.Distributors, "Id", "Name", order.DistributorId);
 
             return View(order);
         }
 
+
         [HttpPost]
         public IActionResult EditOrder(Order order)
         {
+            // Исключаем навигационные свойства из валидации
+            ModelState.Remove("OrderProducts");
+            ModelState.Remove("Distributor");
+            ModelState.Remove("ColProducts");
+            ModelState.Remove("RoutePoint");
             // Проверяем валидность модели
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Убедимся, что дата в UTC формате
+                    order.DeliveryDate = DateTime.SpecifyKind(order.DeliveryDate, DateTimeKind.Utc);
+
                     // Обновляем заказ в базе данных
                     _context.Orders.Update(order);
                     _context.SaveChanges();
@@ -139,10 +149,11 @@ namespace SmartLoad.Controllers
             }
 
             // Возвращаем данные для повторного отображения формы редактирования
-            ViewData["RoutePointId"] = new SelectList(_context.RoutePoints, "Id", "Name", order.RoutePoint.Id);
-            ViewData["DistributorId"] = new SelectList(_context.Distributors, "Id", "Name", order.DistributorId);
+            ViewBag.RoutePoints = new SelectList(_context.RoutePoints, "Id", "Name", order.RoutePointId);
+            ViewBag.Distributors = new SelectList(_context.Distributors, "Id", "Name", order.DistributorId);
             return View(order);
         }
+
 
         public IActionResult DeleteOrder(int id)
         {
@@ -241,6 +252,9 @@ namespace SmartLoad.Controllers
         [HttpPost]
         public IActionResult EditOrderProduct(OrderProduct orderProduct)
         {
+            // Исключаем навигационные свойства из валидации
+            ModelState.Remove("Order");
+            ModelState.Remove("Product");
             if (ModelState.IsValid)
             {
                 _context.OrderProducts.Update(orderProduct);

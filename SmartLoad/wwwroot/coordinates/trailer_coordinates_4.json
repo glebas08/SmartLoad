@@ -1,0 +1,28 @@
+{
+  "loadingSchemeId": 4,
+  "timestamp": "2025-03-30T09:09:54.524Z",
+  "vehicle": {
+    "tractorLength": 3780,
+    "tractorWidth": 2.5,
+    "tractorHeight": 3.8,
+    "trailerLength": 13620,
+    "trailerWidth": 2480,
+    "trailerHeight": 3000,
+    "kingpinPosition": 565,
+    "tractorAxleCount": 2,
+    "trailerAxleCount": 3,
+    "trailerKingpinToAxle": 7630
+  },
+  "trailer3D": {
+    "position": {
+      "x": -6810,
+      "y": 1500,
+      "z": 0
+    },
+    "dimensions": {
+      "length": 13620,
+      "width": 2480,
+      "height": 3000
+    }
+  }
+}

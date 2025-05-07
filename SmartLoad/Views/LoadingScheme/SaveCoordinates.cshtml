@@ -1,0 +1,55 @@
+﻿<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Сохраненные координаты</h4>
+        <div id="savedFiles">
+            <!-- Здесь будут отображаться ссылки на сохраненные файлы -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функция для обновления списка сохраненных файлов
+    function updateSavedFilesList() {
+        fetch('/LoadingScheme/GetSavedCoordinates?schemeId=@Model.LoadingScheme.Id')
+            .then(response => response.json())
+            .then(data => {
+                const filesContainer = document.getElementById('savedFiles');
+                if (filesContainer) {
+                    if (data.files && data.files.length > 0) {
+                        let html = '<ul class="list-group">';
+                        data.files.forEach(file => {
+                            html += `
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    ${file.name}
+                                    <a href="/coordinates/${file.name}" download class="btn btn-sm btn-outline-primary">
+                                        Скачать
+                                    </a>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                        filesContainer.innerHTML = html;
+                    } else {
+                        filesContainer.innerHTML = '<p>Нет сохраненных файлов координат</p>';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при получении списка файлов:', error);
+            });
+    }
+
+    // Обновляем список файлов при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSavedFilesList();
+
+        // Обновляем список после сохранения файла
+        const saveButtons = document.querySelectorAll('#saveCargoCoordinates, #saveTrailerCoordinates');
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Обновляем список через 1 секунду после нажатия кнопки
+                setTimeout(updateSavedFilesList, 1000);
+            });
+        });
+    });
+</script>
