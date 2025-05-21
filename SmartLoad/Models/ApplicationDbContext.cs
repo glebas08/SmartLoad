@@ -20,6 +20,7 @@ namespace SmartLoad.Data
         public DbSet<Distributor> Distributors { get; set; } = null!;
         public DbSet<RoutePointMapping> RoutePointMappings { get; set; } = null!;
         public DbSet<LoadingSchemeItem> LoadingSchemeItems { get; set; } = null!;
+        public DbSet<BlockPlacementStep> BlockPlacementSteps { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

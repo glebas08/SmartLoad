@@ -25,12 +25,17 @@
     </div>
 }
 
+<a asp-action="GenerateWordReport" asp-route-id="@Model.LoadingScheme.Id" class="btn btn-success mt-3">
+    <i class="fas fa-file-word"></i> Сформировать Word-отчёт
+</a>
+
 <div class="row mb-3">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <h5>Информация о схеме загрузки</h5>
             </div>
+
             <div class="card-body">
                 <dl class="row">
                     <dt class="col-sm-4">Транспортное средство:</dt>
@@ -241,17 +246,18 @@
                                         int placedItems = group.Items.Count(item => item.PositionX >= 0 && item.PositionY >= 0 && item.PositionZ >= 0);
                                         float placementPercentage = totalItems > 0 ? (float)placedItems / totalItems * 100 : 0;
                                         float groupWeight = group.Items.Sum(item => item.Product?.PackagingTypes?.FirstOrDefault()?.Weight ?? 0);
-
+                                       // string rowClass = placedItems != totalItems ? "mismatch" : "";
+                                        string textClass = placedItems != totalItems ? "mismatch-text" : "";
                                         <tr>
                                             <td>@(i + 1)</td>
                                             <td>@routePoint.Name</td>
                                             <td>
                                                 <div style="width: 20px; height: 20px; background-color: #@(colors[group.ColorIndex % colors.Length].ToString("X6"));"></div>
                                             </td>
-                                            <td>@placedItems</td>
-                                            <td>@totalItems</td>
-                                            <td>@placementPercentage.ToString("N1")%</td>
-                                            <td>@groupWeight.ToString("N0")</td>
+                                            <td class="@textClass">@placedItems</td>
+                                            <td class="@textClass">@totalItems</td>
+                                            <td class="@textClass">@placementPercentage.ToString("N1")%</td>
+                                            <td class="@textClass">@groupWeight.ToString("N0")</td>
                                         </tr>
                                     }
                                 }
@@ -309,15 +315,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var item in group.Items)
+                                        @foreach (var item in group.Items.Where(i => i.PositionX < 0 || i.PositionY < 0 || i.PositionZ < 0))
                                         {
                                             <tr>
                                                 <td>@item.ProductName</td>
                                                 <td>@item.Length x @item.Width x @item.Height</td>
                                                 <td>
-                                                    <span class="badge bg-primary">X: @item.PositionX</span>
-                                                    <span class="badge bg-success">Y: @item.PositionY</span>
-                                                    <span class="badge bg-info">Z: @item.PositionZ</span>
+                                                   X: @item.PositionX
+                                                   Y: @item.PositionY
+                                                   Z: @item.PositionZ
+													@* <span class="badge bg-info"></span> *@
                                                 </td>
                                                 <td>
                                                     <a asp-action="DeleteProduct" asp-route-id="@item.Id" asp-route-loadingSchemeId="@Model.LoadingScheme.Id" class="btn btn-danger btn-sm">Удалить</a>
@@ -353,11 +360,17 @@
             </select>
         </div>
     </div>
-
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="showUnplaced">Неразмещенные блоки:</label>
+            <button id="showUnplaced" class="btn btn-primary form-control">Показать/скрыть неразмещенные блоки</button>
+        </div>
+    </div>
 </div>
 
+
 <div class="loading-scheme-container">
-    <div class="alert alert-info mb-3">
+    @* <div class="alert alert-info mb-3">
         <h5><i class="fas fa-info-circle"></i> Информация о системе координат</h5>
         <div class="row">
             <div class="col-md-6">
@@ -414,7 +427,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> *@
     <div id="3d-container" style="width: 100%; height: 500px; border: 1px solid #ccc; @(Model.ViewType != "3D" ? "display:none;" : "")"></div>
     <div id="2d-top-container" style="width: 100%; height: 500px; border: 1px solid #ccc; @(Model.ViewType != "2D-Top" ? "display:none;" : "")"></div>
     <div id="2d-side-container" style="width: 100%; height: 500px; border: 1px solid #ccc; @(Model.ViewType != "2D-Side" ? "display:none;" : "")"></div>
@@ -476,13 +489,14 @@
         const trailerLength = @(Model.LoadingScheme.Vehicle.TrailerLength / 1000.0f);
         const trailerWidth = @(Model.LoadingScheme.Vehicle.TrailerWidth / 1000.0f);
         const trailerHeight = @(Model.LoadingScheme.Vehicle.TrailerHeight / 1000.0f);
-        
+
         // Глобальные переменные для 3D-сцены
         let scene, camera, renderer, controls;
         let is3DInitialized = false;
         let is2DTopInitialized = false;
         let is2DSideInitialized = false;
-        
+        let unplacedArea; // Добавляем переменную для области неразмещенных блоков
+
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             // Инициализируем только текущий вид
@@ -507,8 +521,19 @@
                 // Сохраняем выбор пользователя через AJAX
                 saveViewPreference(newViewType);
             });
+            // Добавляем обработчик для кнопки показа/скрытия неразмещенных блоков
+            const showUnplacedBtn = document.getElementById('showUnplaced');
+            if (showUnplacedBtn) {
+                showUnplacedBtn.addEventListener('click', function() {
+                    if (unplacedArea && currentViewType === '3D') {
+                        unplacedArea.visible = !unplacedArea.visible;
+                        this.textContent = unplacedArea.visible ?
+                            "Скрыть неразмещенные блоки" :
+                            "Показать неразмещенные блоки";
+                    }
+                });
+            }
         });
-        
         // Функция для инициализации текущего вида
         function initCurrentView() {
             if (currentViewType === '3D' && !is3DInitialized) {
@@ -524,7 +549,7 @@
         }
         
         // Функция для сохранения предпочтений пользователя
-                function saveViewPreference(viewType) {
+        function saveViewPreference(viewType) {
             fetch('@Url.Action("SaveViewPreference", "LoadingScheme")', {
                 method: 'POST',
                 headers: {
@@ -578,7 +603,7 @@
             const trailer = new THREE.Mesh(trailerGeometry, trailerMaterial);
             trailer.position.set(trailerLength / 2, trailerHeight / 2, trailerWidth / 2);
             scene.add(trailer);
-                    // Создаем метки для начала и конца полуприцепа
+            // Создаем метки для начала и конца полуприцепа
             function createLabel(text, position, color = 0x000000) {
                 // Создаем канвас для текста
                 const canvas = document.createElement('canvas');
@@ -711,9 +736,8 @@
 
 
 
-
-                // Добавление продуктов
-                destinationGroups.forEach((group, groupIndex) => {
+            // Добавление продуктов
+            destinationGroups.forEach((group, groupIndex) => {
                     const color = colors[groupIndex % colors.length];
 
                     console.log(`Группа ${group.destination}, количество элементов: ${group.items.length}`);
@@ -778,6 +802,143 @@
                     });
                 });
 
+            //#regionДобавление неразмещенных блоков за пределами полуприцепа
+            // Добавление неразмещенных блоков за пределами полуприцепа
+
+                    // Функция для создания текстовых меток
+        function addTextLabel(text, position, size = 1, color = 0x000000) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 128;
+
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.font = 'Bold 24px Arial';
+            context.fillStyle = '#' + color.toString(16).padStart(6, '0');
+            context.textAlign = 'center';
+            context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.needsUpdate = true;
+
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+
+            const geometry = new THREE.PlaneGeometry(size, size * 0.5);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(position);
+
+            scene.add(mesh);
+            return mesh;
+        }
+
+
+            unplacedArea = new THREE.Group();
+            unplacedArea.position.set(trailerLength + 1, 0, 0); // Позиция в 1 метре от задней части полуприцепа
+            scene.add(unplacedArea);
+
+
+            // Добавляем метку для области неразмещенных блоков
+            const unplacedLabel = createLabel('НЕРАЗМЕЩЕННЫЕ БЛОКИ',
+                new THREE.Vector3(trailerLength + 2, trailerHeight + 0.5, trailerWidth / 2), 0xff0000);
+            unplacedLabel.scale.set(2, 2, 2); // Увеличиваем размер метки
+
+            // Отображаем неразмещенные блоки
+            let unplacedOffsetX = 0;
+            let unplacedOffsetY = 0;
+            let unplacedOffsetZ = 0;
+            const maxUnplacedWidth = 3; // Максимальная ширина области неразмещенных блоков
+            const spaceBetweenBlocks = 0.1; // Расстояние между блоками
+
+            destinationGroups.forEach((group, groupIndex) => {
+            const color = colors[groupIndex % colors.length];
+
+            // Фильтруем только неразмещенные блоки (с отрицательными координатами)
+            const unplacedItems = group.items.filter(item =>
+                item.positionX < 0 || item.positionY < 0 || item.positionZ < 0);
+
+            unplacedItems.forEach(item => {
+                // Преобразуем миллиметры в метры для всех размеров
+                const itemLength = item.length / 1000;
+                const itemWidth = item.width / 1000;
+                const itemHeight = item.height / 1000;
+
+                const boxGeometry = new THREE.BoxGeometry(itemLength, itemHeight, itemWidth);
+                const boxMaterial = new THREE.MeshPhongMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.7 // Делаем блоки полупрозрачными для отличия
+                });
+                const box = new THREE.Mesh(boxGeometry, boxMaterial);
+
+                // Позиционируем блок в области неразмещенных блоков
+                box.position.set(
+                    unplacedOffsetX + itemLength/2,
+                    unplacedOffsetZ + itemHeight/2,
+                    unplacedOffsetY + itemWidth/2
+                );
+
+                // Добавляем каркас для блока
+                const boxEdges = new THREE.EdgesGeometry(boxGeometry);
+                const boxLine = new THREE.LineSegments(
+                    boxEdges,
+                    new THREE.LineBasicMaterial({ color: 0x000000 })
+                );
+                boxLine.position.copy(box.position);
+
+                // Добавляем блок и его каркас в группу неразмещенных блоков
+                unplacedArea.add(box);
+                unplacedArea.add(boxLine);
+
+                // Добавляем метку с названием продукта
+                if (itemLength > 0.3 && itemWidth > 0.3 && itemHeight > 0.3) {
+                    const productLabel = createLabel(
+                        item.productName.substring(0, 10),
+                        new THREE.Vector3(
+                            unplacedOffsetX + itemLength/2,
+                            unplacedOffsetZ + itemHeight + 0.05,
+                            unplacedOffsetY + itemWidth/2
+                        ),
+                        0x000000
+                    );
+                    productLabel.scale.set(0.5, 0.5, 0.5);
+                    unplacedArea.add(productLabel);
+                }
+
+                // Обновляем смещение для следующего блока
+                unplacedOffsetX += itemLength + spaceBetweenBlocks;
+
+                // Если достигли максимальной ширины, переходим на новую "строку"
+                if (unplacedOffsetX > maxUnplacedWidth) {
+                    unplacedOffsetX = 0;
+                    unplacedOffsetY += itemWidth + spaceBetweenBlocks;
+
+                    // Если заполнили "площадку", переходим на новый "этаж"
+                    if (unplacedOffsetY > maxUnplacedWidth) {
+                        unplacedOffsetY = 0;
+                        unplacedOffsetZ += itemHeight + spaceBetweenBlocks;
+                    }
+                }
+            });
+        });
+
+            // Добавляем плоскость под неразмещенными блоками для визуального отделения
+            const unplacedPlatformGeometry = new THREE.PlaneGeometry(maxUnplacedWidth + 1, maxUnplacedWidth + 1);
+            const unplacedPlatformMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff9999,
+                side: THREE.DoubleSide
+            });
+            const unplacedPlatform = new THREE.Mesh(unplacedPlatformGeometry, unplacedPlatformMaterial);
+            unplacedPlatform.rotation.x = -Math.PI / 2; // Поворачиваем плоскость горизонтально
+            unplacedPlatform.position.set(maxUnplacedWidth/2, -0.01, maxUnplacedWidth/2); // Немного ниже уровня пола
+            unplacedArea.add(unplacedPlatform);
+            //#endregion
+
+
                 // Добавление осей координат
                 const axesHelper = new THREE.AxesHelper(5);
                 scene.add(axesHelper);
@@ -817,8 +978,8 @@
         }
 
         // Функция для инициализации 2D-вида сверху
-        function init2DTopView() {
-            console.log("Инициализация 2D вида сверху");
+                function init2DTopView() {
+            console.log("Инициализация 2D вида снизу");
             const container = document.getElementById('2d-top-container');
             container.innerHTML = ''; // Очищаем контейнер
 
@@ -830,77 +991,85 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Масштабирование для отображения полуприцепа на холсте
+            // Масштабирование
             const scale = Math.min(
                 (canvas.width - 40) / trailerLength,
                 (canvas.height - 40) / trailerWidth
             );
 
-            // Отрисовка полуприцепа
+            // Отрисовка полуприцепа (вид снизу)
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.strokeRect(20, 20, trailerLength * scale, trailerWidth * scale);
 
-            // Добавляем подписи осей
-            ctx.fillStyle = '#000';
-            ctx.font = '12px Arial';
-            ctx.fillText('Перед полуприцепа', 20, 15);
-            ctx.fillText('Зад полуприцепа', 20 + trailerLength * scale - 100, 15);
-
-            // Отрисовка продуктов
+            // Создаем массив с оригинальными индексами групп
+            let sortedItems = [];
             destinationGroups.forEach((group, groupIndex) => {
-                const color = '#' + colors[groupIndex % colors.length].toString(16).padStart(6, '0');
-
-                console.log(`Группа ${group.destination}, количество элементов: ${group.items.length}`);
-
                 group.items.forEach(item => {
-                    // Преобразуем позиции из миллиметров в метры
-                    const posX = item.positionX / 1000;
-                    const posY = item.positionY / 1000;
-
-                    // Размеры в метрах
-                    const itemLength = item.length / 1000;
-                    const itemWidth = item.width / 1000;
-
-                    console.log(`Блок 2D-Top: ${item.productName}`);
-                    console.log(`Размеры (м): ${itemLength}x${itemWidth}`);
-                    console.log(`Позиция (м): X=${posX}, Y=${posY}`);
-
-                    // Рисуем блок
-                    ctx.fillStyle = color;
-                    ctx.fillRect(
-                        20 + posX * scale,
-                        20 + posY * scale,
-                        itemLength * scale,
-                        itemWidth * scale
-                    );
-
-                    // Рисуем контур
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(
-                        20 + posX * scale,
-                        20 + posY * scale,
-                        itemLength * scale,
-                        itemWidth * scale
-                    );
-
-                    // Добавляем текст с названием продукта, если блок достаточно большой
-                    if (itemLength * scale > 40 && itemWidth * scale > 20) {
-                        ctx.fillStyle = '#000';
-                        ctx.font = '10px Arial';
-                        ctx.fillText(
-                            item.productName.substring(0, 10),
-                            20 + posX * scale + 5,
-                            20 + posY * scale + 15
-                        );
-                    }
+                    sortedItems.push({ ...item, originalGroupIndex: groupIndex });
                 });
+            });
+
+            // **Добавляем подписи для передней и задней части**
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Зад полуприцепа (двери)', 25, 15);
+            ctx.fillText('Перед полуприцепа (Ближе к тягачу)',
+                20 + trailerLength * scale - 300, 15);
+
+            // **Добавляем подписи осей**
+            // ctx.fillText('Ось X →', 20 + trailerLength * scale - 80, 20 + trailerWidth * scale + 20);
+            // ctx.fillText('↑ Ось Y', 10, 20 + trailerWidth * scale / 2);
+
+            // Сортируем блоки по высоте (чтобы сначала рисовать нижние, а затем верхние)
+            sortedItems.sort((a, b) => a.positionZ - b.positionZ);
+
+            // Отрисовка грузов
+            sortedItems.forEach((item, index) => {
+                const posX = item.positionX / 1000;
+                const posY = item.positionY / 1000;
+                const itemLength = item.length / 1000;
+                const itemWidth = item.width / 1000;
+
+                // Используем оригинальный индекс группы для цвета
+                const colorIndex = item.originalGroupIndex % colors.length;
+                const color = colors[colorIndex];
+
+                // Цвет с прозрачностью (чем ниже блок, тем менее прозрачный)
+                const alpha = 0.3 + (index / sortedItems.length) * 0.7;
+                ctx.fillStyle = `rgba(${(color >> 16) & 255}, ${(color >> 8) & 255}, ${color & 255}, ${alpha})`;
+
+                ctx.fillRect(
+                    20 + posX * scale,
+                    20 + posY * scale,
+                    itemLength * scale,
+                    itemWidth * scale
+                );
+
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(
+                    20 + posX * scale,
+                    20 + posY * scale,
+                    itemLength * scale,
+                    itemWidth * scale
+                );
+
+                // Подпись груза
+                if (itemLength * scale > 40 && itemWidth * scale > 20) {
+                    ctx.fillStyle = '#000';
+                    ctx.font = '10px Arial';
+                    ctx.fillText(
+                        item.productName.substring(0, 10),
+                        20 + posX * scale + 5,
+                        20 + posY * scale + 15
+                    );
+                }
             });
         }
 
         // Функция для инициализации 2D-вида сбоку
-        function init2DSideView() {
+                function init2DSideView() {
             console.log("Инициализация 2D вида сбоку");
             const container = document.getElementById('2d-side-container');
             container.innerHTML = ''; // Очищаем контейнер
@@ -913,74 +1082,88 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Масштабирование для отображения полуприцепа на холсте
+            // Масштабирование
             const scale = Math.min(
                 (canvas.width - 40) / trailerLength,
                 (canvas.height - 40) / trailerHeight
             );
 
-            // Отрисовка полуприцепа
+            // Отрисовка полуприцепа (вид сбоку)
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.strokeRect(20, 20, trailerLength * scale, trailerHeight * scale);
 
-            // Добавляем подписи
+            // **Добавляем подписи для передней и задней части**
             ctx.fillStyle = '#000';
-            ctx.font = '12px Arial';
-            ctx.fillText('Перед полуприцепа', 20, 15);
-            ctx.fillText('Зад полуприцепа', 20 + trailerLength * scale - 100, 15);
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Перед полуприцепа (X = 0)', 25, 15);
+            ctx.fillText('Зад полуприцепа (X = ' + trailerLength + ')',
+                20 + trailerLength * scale - 150, 15);
 
-            // Отрисовка продуктов
+            // **Добавляем подписи осей**
+            ctx.fillText('Ось X →', 20 + trailerLength * scale - 80, 20 + trailerHeight * scale + 20);
+            ctx.fillText('↑ Ось Z', 10, 20 + trailerHeight * scale / 2);
+
+            // Сортируем блоки по высоте (чтобы сначала рисовать нижние, а затем верхние)
+            let sortedItems = [];
             destinationGroups.forEach((group, groupIndex) => {
-                const color = '#' + colors[groupIndex % colors.length].toString(16).padStart(6, '0');
-
-                console.log(`Группа ${group.destination}, количество элементов: ${group.items.length}`);
-
                 group.items.forEach(item => {
-                    // Преобразуем позиции из миллиметров в метры
-                    const posX = item.positionX / 1000;
-                    const posZ = item.positionZ / 1000;
-
-                    // Размеры в метрах
-                    const itemLength = item.length / 1000;
-                    const itemHeight = item.height / 1000;
-
-                    console.log(`Блок 2D-Side: ${item.productName}`);
-                    console.log(`Размеры (м): ${itemLength}x${itemHeight}`);
-                    console.log(`Позиция (м): X=${posX}, Z=${posZ}`);
-
-                    // Рисуем блок
-                    ctx.fillStyle = color;
-                    ctx.fillRect(
-                        20 + posX * scale,
-                        20 + posZ * scale,
-                        itemLength * scale,
-                        itemHeight * scale
-                    );
-
-                    // Рисуем контур
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(
-                        20 + posX * scale,
-                        20 + posZ * scale,
-                        itemLength * scale,
-                        itemHeight * scale
-                    );
-
-                    // Добавляем текст с названием продукта, если блок достаточно большой
-                    if (itemLength * scale > 40 && itemHeight * scale > 20) {
-                        ctx.fillStyle = '#000';
-                        ctx.font = '10px Arial';
-                        ctx.fillText(
-                            item.productName.substring(0, 10),
-                            20 + posX * scale + 5,
-                            20 + posZ * scale + 15
-                        );
-                    }
+                    sortedItems.push({ ...item, originalGroupIndex: groupIndex });
                 });
             });
+
+            sortedItems.sort((a, b) => a.positionZ - b.positionZ);
+
+            // Отрисовка грузов
+            sortedItems.forEach((item, index) => {
+                const posX = item.positionX / 1000;
+                const posZ = item.positionZ / 1000; // Используем Z для высоты
+                const itemLength = item.length / 1000;
+                const itemHeight = item.height / 1000;
+
+                // **Корректируем X, чтобы груз был внутри полуприцепа**
+                const correctedX = 20 + (trailerLength - posX - itemLength) * scale;
+
+                // **Корректируем Z, чтобы груз был внутри полуприцепа**
+                const correctedZ = 20 + (trailerHeight - posZ - itemHeight) * scale;
+
+                // Используем оригинальный индекс группы для цвета
+                const colorIndex = item.originalGroupIndex % colors.length;
+                const color = colors[colorIndex];
+
+                // Цвет с прозрачностью (чем ниже блок, тем менее прозрачный)
+                const alpha = 0.3 + (index / sortedItems.length) * 0.7;
+                ctx.fillStyle = `rgba(${(color >> 16) & 255}, ${(color >> 8) & 255}, ${color & 255}, ${alpha})`;
+
+                ctx.fillRect(
+                    correctedX,
+                    correctedZ, // **Используем скорректированную Z**
+                    itemLength * scale,
+                    itemHeight * scale
+                );
+
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(
+                    correctedX,
+                    correctedZ,
+                    itemLength * scale,
+                    itemHeight * scale
+                );
+
+                // Подпись груза
+                if (itemLength * scale > 40 && itemHeight * scale > 20) {
+                    ctx.fillStyle = '#000';
+                    ctx.font = '10px Arial';
+                    ctx.fillText(
+                        item.productName.substring(0, 10),
+                        correctedX + 5,
+                        correctedZ + 15
+                    );
+                }
+            });
         }
+
 
         // Функция для выравнивания позиций блоков
         function snapPosition(pos) {
@@ -990,3 +1173,9 @@
     </script>
 }
 
+@* 
+0.3 — базовая прозрачность для нижних блоков.
+
+index / sortedItems.length — относительное положение блока (нижние → маленькое значение, верхние → большее).
+
+* 0.7 — масштабируем диапазон прозрачности. *@

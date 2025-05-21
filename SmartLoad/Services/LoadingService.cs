@@ -13,35 +13,46 @@ namespace SmartLoad.Services
         private const double MinXStep = 0.3;
         private const double XStepRatio = 0.5;
         private const double HeavyWeightThreshold = 300.0;
+        private List<BlockPlacementStep> _placementHistory = new();
 
         public LoadingService(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        public List<BlockPlacementStep> GetPlacementHistory()
+        {
+            return _placementHistory;
+        }
+
         public async Task<(List<CargoPlacement> Placements, string ErrorMessage)> CalculatePlacementAsync(
     Vehicle vehicle, Rout route, List<Order> orders)
         {
             // Первая попытка - стандартный алгоритм (размещение с начала)
-            var firstAttempt = await TryCalculatePlacement(vehicle, route, orders, fromFront: true);
+            var firstAttempt = await TryCalculatePlacement(vehicle, route, orders);
 
-            // Если разместили менее 70% грузов, пробуем альтернативную стратегию
-            if (firstAttempt.Placements.Count(p => p.X >= 0) < orders.Sum(o => o.OrderProducts.Sum(op => op.Quantity)) * 0.99)
+            var (placements, errorMessage) = firstAttempt;
+
+            // Проверяем, есть ли неразмещенные блоки
+            bool allPlaced = placements.All(p => p.X >= 0 && p.Y >= 0 && p.Z >= 0);
+
+            if (!allPlaced)
             {
-                var secondAttempt = await TryCalculatePlacement(vehicle, route, orders, fromFront: false);
-
-                // Возвращаем лучший из двух вариантов
-                int o = secondAttempt.Placements.Count(p => p.X >= 0);
-                int t = firstAttempt.Placements.Count(p => p.X >= 0);
-                return o > t
-                    ? secondAttempt
-                    : firstAttempt;
+                // Если есть неразмещенные блоки — проверяем, связана ли это с осями
+                if (!string.IsNullOrEmpty(errorMessage) && errorMessage.Contains("задней оси тягача"))
+                {
+                    return (placements, "Ошибка: Перевес задней оси тягача");
+                }
+                else
+                {
+                    return (placements, "Ошибка: Не все блоки размещены");
+                }
             }
 
-            return firstAttempt;
+            return (placements, null); // Все блоки размещены успешно
         }
         private async Task<(List<CargoPlacement> Placements, string ErrorMessage)> TryCalculatePlacement(
-    Vehicle vehicle, Rout route, List<Order> orders, bool fromFront)
+            Vehicle vehicle, Rout route, List<Order> orders)
         {
             InitializeState();
             var placements = new List<CargoPlacement>();
@@ -58,7 +69,7 @@ namespace SmartLoad.Services
 
                 foreach (var block in blocks)
                 {
-                    if (!TryPlaceBlockAsync(vehicle, block, placements, occupiedSpaces, placementInfo, fromFront))
+                    if (!TryPlaceBlockAsync(vehicle, block, placements, occupiedSpaces, placementInfo))
                     {
                         placements.Add(new CargoPlacement
                         {
@@ -84,9 +95,10 @@ namespace SmartLoad.Services
                 return (placements, $"Ошибка: {ex.Message}");
             }
         }
+
         #region Вспомогательные методы и классы
         private (bool IsValid, string ErrorMessage) ValidateFinalLoads(
-            Vehicle vehicle, List<(int ProductId, float X, float Weight)> placementInfo, List<CargoPlacement> placements)
+     Vehicle vehicle, List<(int ProductId, float X, float Weight)> placementInfo, List<CargoPlacement> placements)
         {
             if (placements.Count == 0)
                 return (true, null);
@@ -97,11 +109,9 @@ namespace SmartLoad.Services
             foreach (var (productId, posX, weight) in placementInfo)
             {
                 totalCargoWeight += weight;
-
                 var placement = placements.FirstOrDefault(p =>
                     p.ProductId == productId && Math.Abs(p.X - posX) < 0.001f);
                 float blockLength = placement?.Length ?? 0;
-
                 float centerX = posX + blockLength / 2;
                 float distanceFromKingpin = vehicle.TrailerLength - centerX;
                 totalMoment += weight * distanceFromKingpin;
@@ -113,23 +123,28 @@ namespace SmartLoad.Services
 
             var finalLoads = vehicle.CalculateAxleLoads(totalCargoWeight, cargoPositionFromKingpin);
 
-            if (!vehicle.ValidateAxleLoads(finalLoads))
+            var errorDetails = new List<string>();
+
+            if (finalLoads.TryGetValue("TractorFrontAxle", out float frontAxleLoad) &&
+                frontAxleLoad > vehicle.TractorMaxFrontAxleLoad)
             {
-                var errorDetails = new List<string>();
+                errorDetails.Add($"Перегруз передней оси: {frontAxleLoad:N0} > {vehicle.TractorMaxFrontAxleLoad:N0} кг");
+            }
 
-                if (finalLoads.TryGetValue("TractorFrontAxle", out float frontAxleLoad) &&
-                    frontAxleLoad > vehicle.TractorMaxFrontAxleLoad)
-                {
-                    errorDetails.Add($"Перегруз передней оси: {frontAxleLoad:N0} > {vehicle.TractorMaxFrontAxleLoad:N0} кг");
-                }
+            if (finalLoads.TryGetValue("TractorRearAxle", out float rearAxleLoad) &&
+                rearAxleLoad > vehicle.TractorMaxRearAxleLoad)
+            {
+                errorDetails.Add($"Перевес задней оси тягача: {rearAxleLoad:N0} > {vehicle.TractorMaxRearAxleLoad:N0} кг");
+            }
 
-                // Аналогичные проверки для других осей...
-                if (finalLoads.TryGetValue("TrailerAxles", out float trailerAxleLoad) &&
-                    trailerAxleLoad > (vehicle.TrailerMaxAxleLoad * vehicle.TrailerAxleCount))
-                {
-                    errorDetails.Add($"Перегруз осей полуприцепа: {trailerAxleLoad:N0} > {vehicle.TrailerMaxAxleLoad * vehicle.TrailerAxleCount:N0} кг");
-                }
+            if (finalLoads.TryGetValue("TrailerAxles", out float trailerAxleLoad) &&
+                trailerAxleLoad > (vehicle.TrailerMaxAxleLoad * vehicle.TrailerAxleCount))
+            {
+                errorDetails.Add($"Перегруз осей полуприцепа: {trailerAxleLoad:N0} > {vehicle.TrailerMaxAxleLoad * vehicle.TrailerAxleCount:N0} кг");
+            }
 
+            if (errorDetails.Count > 0)
+            {
                 return (false, "Финальная проверка: " + string.Join("; ", errorDetails));
             }
 
@@ -168,7 +183,7 @@ namespace SmartLoad.Services
                 .ToList();
         }
         private bool TryPlaceBlockAsync(Vehicle vehicle, Block block, List<CargoPlacement> placements,
-     List<OccupiedSpace> occupiedSpaces, List<(int ProductId, float X, float Weight)> placementInfo, bool fromFront)
+        List<OccupiedSpace> occupiedSpaces, List<(int ProductId, float X, float Weight)> placementInfo)
         {
             if (block.Length <= 0 || block.Width <= 0 || block.Height <= 0 || block.Weight <= 0)
             {
@@ -181,6 +196,7 @@ namespace SmartLoad.Services
             foreach (var orientation in orientations)
             {
                 double xStep = Math.Max(orientation.Length * XStepRatio, MinXStep);
+
                 for (double x = trailerLength - orientation.Length; x >= 0; x -= xStep)
                 {
                     if (block.Weight > HeavyWeightThreshold && x > trailerLength * 0.7)
@@ -237,78 +253,20 @@ namespace SmartLoad.Services
                                 CheckAxleLoads(vehicle, block, x, orientation.Length, placementInfo, placements))
                             {
                                 PlaceBlock(vehicle, block, x, bestY, z, orientation, placements, occupiedSpaces, placementInfo);
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            foreach (var orientation in orientations)
-            {
-                double xStep = Math.Max(orientation.Length * XStepRatio, MinXStep);
-
-                // Изменяем направление обхода в зависимости от параметра fromFront
-                double startX = fromFront ? 0 : vehicle.TrailerLength - orientation.Length;
-                double endX = fromFront ? vehicle.TrailerLength - orientation.Length : 0;
-                double step = fromFront ? xStep : -xStep;
-
-                for (double x = startX; fromFront ? x <= endX : x >= endX; x += step)
-                {
-                    if (block.Weight > HeavyWeightThreshold && x > trailerLength * 0.7)
-                        continue;
-                    Dictionary<double, double> yLevels = new Dictionary<double, double>();
-                    double centerY = (trailerWidth - orientation.Width) / 2;
-                    double maxYOffset = Math.Max(centerY, trailerWidth - centerY - orientation.Width);
-
-                    List<double> yPositions = new List<double>();
-                    for (double yOffset = 0; yOffset <= maxYOffset; yOffset += orientation.Width)
-                    {
-                        double yRight = centerY + yOffset;
-                        if (yRight + orientation.Width <= trailerWidth)
-                        {
-                            yPositions.Add(yRight);
-                        }
-
-                        if (yOffset > 0)
-                        {
-                            double yLeft = centerY - yOffset;
-                            if (yLeft >= 0)
-                            {
-                                yPositions.Add(yLeft);
-                            }
-                        }
-                    }
-
-                    foreach (var y in yPositions)
-                    {
-                        double currentHeight = 0;
-                        var supportingBlocks = occupiedSpaces
-                            .Where(os =>
-                                x < os.X + os.Length &&
-                                x + orientation.Length > os.X &&
-                                y < os.Y + os.Width &&
-                                y + orientation.Width > os.Y)
-                            .OrderByDescending(os => os.Z + os.Height)
-                            .FirstOrDefault();
-
-                        if (supportingBlocks != null)
-                        {
-                            currentHeight = supportingBlocks.Z + supportingBlocks.Height;
-                        }
-                        yLevels[y] = currentHeight;
-                    }
-
-                    if (yLevels.Count > 0)
-                    {
-                        var bestY = yLevels.OrderBy(kvp => kvp.Value).First().Key;
-                        double z = yLevels[bestY];
-                        if (z + orientation.Height <= trailerHeight)
-                        {
-                            if (CanPlaceBlock(occupiedSpaces, x, bestY, z, orientation, block.RoutePointPriority) &&
-                                CheckAxleLoads(vehicle, block, x, orientation.Length, placementInfo, placements))
-                            {
-                                PlaceBlock(vehicle, block, x, bestY, z, orientation, placements, occupiedSpaces, placementInfo);
+                                _placementHistory.Add(new BlockPlacementStep
+                                {
+                                    StepNumber = _placementHistory.Count + 1,
+                                    ProductId = block.ProductId,
+                                    ProductName = GetProductName(block.ProductId), // Реализуйте этот метод или замените на реальное имя
+                                    PositionX = x,
+                                    PositionY = bestY,
+                                    PositionZ = z,
+                                    Length = orientation.Length,
+                                    Width = orientation.Width,
+                                    Height = orientation.Height,
+                                    Weight = block.Weight,
+                                    Destination = block.Destination
+                                });
                                 return true;
                             }
                         }
@@ -316,6 +274,11 @@ namespace SmartLoad.Services
                 }
             }
             return false;
+        }
+        private string GetProductName(int productId)
+        {
+            // Замените на реальный запрос к БД, если нужно
+            return $"Товар #{productId}";
         }
         private List<Orientation> GetPossibleOrientations(Block block)
         {
@@ -540,7 +503,6 @@ namespace SmartLoad.Services
             public double Height { get; set; }
             public int RoutePointPriority { get; set; }
         }
-
         private record Orientation(double Length, double Width, double Height);
         #endregion
     }

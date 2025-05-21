@@ -7,32 +7,55 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
+        /* Основные стили для навбара */
         .navbar-custom {
             background-color: #FF4500;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-            .navbar-custom .navbar-brand,
-            .navbar-custom .nav-link {
-                color: white;
-            }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        /* Фикс для фиксированного навбара */
+        body {
+            padding-top: 60px;
+        }
+        
+        /* Стиль для активного пункта меню */
+        .navbar-custom .nav-item.active .nav-link {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        /* Анимация иконки "гамбургера" */
+        .navbar-toggler {
+            border-color: rgba(255,255,255,0.5);
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-custom navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
+        <!-- Фиксированная навигационная панель с fixed-top -->
+        <nav class="navbar navbar-custom navbar-expand-sm navbar-toggleable-sm fixed-top border-bottom box-shadow">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SmartLoad</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <strong>SmartLoad</strong>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" 
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="VhodData">Входные данные</a>
                         </li>
@@ -41,27 +64,48 @@
                         </li>
                     </ul>
                 </div>
-
             </div>
         </nav>
     </header>
 
-    <div class="container">
+    <!-- Основной контент с дополнительным отступом сверху -->
+    <div class="container mt-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - SmartLoad - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer text-muted mt-5">
+        <div class="container py-3">
+            <div class="row">
+                <div class="col-md-6">
+                    &copy; 2025 - SmartLoad
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Политика конфиденциальности</a>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Скрипт для подсветки активного пункта меню -->
+    <script>
+        $(document).ready(function() {
+            var url = window.location.pathname;
+            $('.navbar-nav .nav-link').each(function() {
+                if (url.includes($(this).attr('href'))) {
+                    $(this).parent().addClass('active');
+                }
+            });
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

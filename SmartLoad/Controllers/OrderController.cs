@@ -97,7 +97,6 @@ namespace SmartLoad.Controllers
             return View(order);
         }
 
-
         public IActionResult EditOrder(int id)
         {
             // Ищем заказ по ID с включением связанных данных
@@ -118,7 +117,6 @@ namespace SmartLoad.Controllers
 
             return View(order);
         }
-
 
         [HttpPost]
         public IActionResult EditOrder(Order order)
